@@ -1,5 +1,7 @@
 package uk.ac.man.cs.eventlite.entities;
 
+@Entity
+@Table(name = "venues")
 public class Venue {
 
 	private long id;
