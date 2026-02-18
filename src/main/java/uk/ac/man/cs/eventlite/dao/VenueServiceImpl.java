@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,6 +21,13 @@ public class VenueServiceImpl implements VenueService {
 	private final static Logger log = LoggerFactory.getLogger(VenueServiceImpl.class);
 
 	private final static String DATA = "data/venues.json";
+	
+	private final VenueRepository venueRepository;
+	
+    @Autowired //service has an repository, service does not implement or extend a repository
+    public VenueServiceImpl(VenueRepository venueRepository) {
+        this.venueRepository = venueRepository;
+    }
 
 	@Override
 	public long count() {
@@ -49,6 +57,11 @@ public class VenueServiceImpl implements VenueService {
 		}
 
 		return venues;
+	}
+	
+	@Override
+	public Venue save(Venue venue) {
+	    return venueRepository.save(venue);
 	}
 
 }
