@@ -7,8 +7,18 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "events")
 public class Event {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -23,9 +33,12 @@ public class Event {
 
 	private long venue;
 
+
 	public Event() {
 	}
 
+
+	
 	public long getId() {
 		return id;
 	}
