@@ -1,51 +1,44 @@
 package uk.ac.man.cs.eventlite.entities;
 
-import jakarta.persistence.*;
-import java.util.Set;
+import jakarta.persistence.*; 
 
 @Entity
 @Table(name = "venues")
 public class Venue {
-
+	
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    private String name;
+	private Long id;
 
-    private int capacity;
+	private String name;
 
-    @OneToMany(mappedBy = "venue")
-    private Set<Event> events;
+	private int capacity;
 
-    public Venue() {
-    }
+	public Venue() {
+	}
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    public int getCapacity() {
-        return capacity;
-    }
+	public int getCapacity() {
+		return capacity;
+	}
 
-    public void setCapacity(int capacity) {
-        this.capacity = capacity;
-    }
-
-    public Set<Event> getEvents() {
-        return events;
-    }
+	public void setCapacity(int capacity) {
+		this.capacity = capacity;
+	}
 }

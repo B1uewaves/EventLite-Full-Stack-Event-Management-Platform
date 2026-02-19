@@ -4,72 +4,78 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "events")
 public class Event {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+	private long id;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+	@JsonFormat(shape = JsonFormat.Shape.STRING)
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	private LocalDate date;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    @DateTimeFormat(pattern = "HH:mm")
-    private LocalTime time;
+	@JsonFormat(shape = JsonFormat.Shape.STRING)
+	@DateTimeFormat(pattern = "HH:mm")
+	private LocalTime time;
 
-    private String name;
+	private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "venue_id")
-    private Venue venue;
+	private long venue;
 
-    public Event() {
-    }
 
-    public long getId() {
-        return id;
-    }
+	public Event() {
+	}
 
-    public void setId(long id) {
-        this.id = id;
-    }
 
-    public LocalDate getDate() {
-        return date;
-    }
+	
+	public long getId() {
+		return id;
+	}
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
+	public void setId(long id) {
+		this.id = id;
+	}
 
-    public LocalTime getTime() {
-        return time;
-    }
+	public LocalDate getDate() {
+		return date;
+	}
 
-    public void setTime(LocalTime time) {
-        this.time = time;
-    }
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public LocalTime getTime() {
+		return time;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setTime(LocalTime time) {
+		this.time = time;
+	}
 
-    public Venue getVenue() {
-        return venue;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setVenue(Venue venue) {
-        this.venue = venue;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public long getVenue() {
+		return venue;
+	}
+
+	public void setVenue(long venue) {
+		this.venue = venue;
+	}
 }
