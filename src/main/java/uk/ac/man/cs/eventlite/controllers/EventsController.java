@@ -48,3 +48,6 @@ public class EventsController {
 	}
 
 }
+
+// Exercise 2, Task 2: removed venueService after implementing many-to-one
+// relationship since events directly contain information about their venue

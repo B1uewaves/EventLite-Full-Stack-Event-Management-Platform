@@ -33,9 +33,9 @@ public class Event {
 
 	private String name;
 	
-	@ManyToOne
+	@ManyToOne	// Exercise 2, Task 1: relationship established since -- "An event is run at one venue"
 	@JoinColumn(name = "venue_id")
-	private Venue venue;
+	private Venue venue; 
 
 
 	public Event() {
@@ -75,11 +75,11 @@ public class Event {
 		this.name = name;
 	}
 
-	public Venue getVenue() {
+	public Venue getVenue() {	// changed return type to Venue
 		return venue;
 	}
 
-	public void setVenue(Venue venue) {
+	public void setVenue(Venue venue) {	// changed venue type from long -> Venue object
 		this.venue = venue;
 	}
 }

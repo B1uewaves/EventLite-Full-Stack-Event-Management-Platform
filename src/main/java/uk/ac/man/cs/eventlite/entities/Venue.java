@@ -17,7 +17,7 @@ public class Venue {
 
 	private int capacity;
 	
-	@OneToMany(mappedBy = "venue")
+	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
 	private Set<Event> events;
 
 	public Venue() {
@@ -49,6 +49,6 @@ public class Venue {
 	}
 	
 	public Set<Event> getEvents() {
-	    return events;
+	    return events; // returns all events hosted at a this venue
 	}
 }
