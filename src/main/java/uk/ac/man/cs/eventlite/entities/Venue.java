@@ -1,8 +1,15 @@
 package uk.ac.man.cs.eventlite.entities;
 
-public class Venue {
+import jakarta.persistence.*; 
 
-	private long id;
+@Entity
+@Table(name = "venues")
+public class Venue {
+	
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
+	private Long id;
 
 	private String name;
 
@@ -11,7 +18,7 @@ public class Venue {
 	public Venue() {
 	}
 
-	public long getId() {
+	public Long getId() {
 		return id;
 	}
 
