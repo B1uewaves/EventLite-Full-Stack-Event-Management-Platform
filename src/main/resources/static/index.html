@@ -10,13 +10,39 @@
 </head>
 
 <body>
-  <div class="container">
-    <h1>EventLite</h1>
+	<!-- NAVBAR -->
+	<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+	  <div class="container">
+	    <a class="navbar-brand" href="/">EventLite</a>
 
-    <p>This is EventLite. See the <a href="/events">list of events</a> for more information.</p>
-  </div>
+	    <div class="collapse navbar-collapse">
+	      <ul class="navbar-nav me-auto">
+	        <li class="nav-item">
+	          <a class="nav-link" href="/events">Browse Events</a>
+	        </li>
+	      </ul>
 
-  <script type="text/javascript" src="/webjars/popper.js/umd/popper.min.js"></script>
-  <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+	      <!-- Create Event Button (Option C route) -->
+	      <a class="btn btn-primary"
+	         href="/admin/events/new">
+	        <i class="fas fa-plus"></i> Create Event
+	      </a>
+	    </div>
+	  </div>
+	</nav>
+	
+	<!-- MAIN CONTENT -->
+	<div class="container">
+	  <h1>EventLite</h1>
+
+	  <p>
+	    This is EventLite. See the
+	    <a href="/events">list of events</a>
+	    for more information.
+	  </p>
+	</div>
+
+	<script src="/webjars/popper.js/umd/popper.min.js"></script>
+	<script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
 </body>
 </html>
