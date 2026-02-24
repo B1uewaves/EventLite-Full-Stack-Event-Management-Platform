@@ -75,11 +75,11 @@ public class Event {
 		this.name = name;
 	}
 
-	public Venue getVenue() {	// changed return type to Venue
+	public Venue getVenue() {	
 		return venue;
 	}
 
-	public void setVenue(Venue venue) {	// changed venue type from long -> Venue object
+	public void setVenue(Venue venue) {
 		this.venue = venue;
 	}
 }
