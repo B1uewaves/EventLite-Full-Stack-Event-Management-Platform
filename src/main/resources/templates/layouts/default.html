@@ -1,3 +1,4 @@
+<!-- Shared style, all pages extend it -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -7,29 +8,75 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
   <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css" />
 </head>
+
 <body>
+  <!-- Top navigation (Consistency + Control) -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+    <div class="container">
+      <a class="navbar-brand font-weight-bold" th:href="@{/events}">EventLite</a>
 
-  <div class="container">
-    <div sec:authorize="!isAuthenticated()">
-      <i class="fa-solid fa-user-slash" aria-hidden="true"></i> Not signed in
-      <a class="btn btn-primary" role="button" th:href="@{/sign-in}">
-        <i class="fa-solid fa-sign-in-alt" aria-hidden="true"></i> Sign in
-      </a>
-    </div>
-    <div sec:authorize="isAuthenticated()">
-      <form th:action="@{/sign-out}" method="post">
-        <i class="fa-solid fa-user" aria-hidden="true"></i> Signed in as <span sec:authentication="name"></span>
-        <button type="submit" class="btn btn-warning"><i class="fa-solid fa-sign-out-alt" aria-hidden="true"></i> Sign out</button>
-      </form>
-    </div>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNav"
+              aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
 
+      <div class="collapse navbar-collapse" id="mainNav">
+        <!-- Left nav -->
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/events}">
+              <i class="fa-solid fa-calendar-days" aria-hidden="true"></i> Events
+            </a>
+          </li>
+        </ul>
+
+        <!-- Right nav actions -->
+        <div class="navbar-nav align-items-lg-center">
+          <!-- Create event (always visible if your requirement is "all users can create") -->
+          <a class="btn btn-primary mr-2" role="button" th:href="@{/admin/events/new}">
+            <i class="fa-solid fa-plus" aria-hidden="true"></i> Create event
+          </a>
+
+          <!-- Auth block -->
+          <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center">
+            <span class="text-muted mr-2">
+              <i class="fa-solid fa-user-slash" aria-hidden="true"></i> Not signed in
+            </span>
+            <a class="btn btn-outline-secondary" role="button" th:href="@{/sign-in}">
+              <i class="fa-solid fa-sign-in-alt" aria-hidden="true"></i> Sign in
+            </a>
+          </div>
+
+          <div sec:authorize="isAuthenticated()" class="d-flex align-items-center">
+            <span class="text-muted mr-2">
+              <i class="fa-solid fa-user" aria-hidden="true"></i>
+              <span>Signed in as </span><strong sec:authentication="name"></strong>
+            </span>
+            <form th:action="@{/sign-out}" method="post" class="m-0">
+              <button type="submit" class="btn btn-warning">
+                <i class="fa-solid fa-sign-out-alt" aria-hidden="true"></i> Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container mt-3">
+    <!-- Flash messages (Informative feedback + Closure) -->
+    <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+
+    <!-- Page content -->
     <div layout:fragment="content">
       Main page body goes here...
     </div>
-  </div>
+  </main>
 
   <script type="text/javascript" src="/webjars/popper.js/umd/popper.min.js"></script>
   <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
