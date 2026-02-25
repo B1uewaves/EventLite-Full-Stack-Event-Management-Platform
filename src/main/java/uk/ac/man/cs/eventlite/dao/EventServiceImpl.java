@@ -1,6 +1,8 @@
 package uk.ac.man.cs.eventlite.dao;
 
 import java.io.InputStream;
+
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -40,5 +42,10 @@ public class EventServiceImpl implements EventService {
 	@Override
 	public Event save(Event event) {
 		return eventRepository.save(event);
+	}
+	
+	@Override
+	public Optional<Event> findById(long id) {
+		return eventRepository.findById(id);
 	}
 }

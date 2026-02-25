@@ -18,15 +18,18 @@
           <th><i class="fa-solid fa-clock"></i> Time</th>
         </tr>
       </thead>
-      <tbody>
-        <tr th:each="e : ${events}">
-          <td th:text="${e.name}">My Event</td>
-          <td th:text="${e.venue.name}">Event venue</td>
-          <td th:text="${{e.date}}">Event date</td>
-          <td th:text="${{e.time}}">Event time</td>
-        </tr>
-      </tbody>
-    </table>
+	  <tbody>
+		<tr th:each="e : ${events}" class="position-relative">
+		  <td>
+		    <a class="stretched-link text-decoration-none"
+		       th:href="@{/events/{id}(id=${e.id})}"
+		       th:text="${e.name}">My Event</a>
+		  </td>
+	      <td th:text="${e.venue.name}">Event venue</td>
+	      <td th:text="${{e.date}}">Event date</td>
+	      <td th:text="${{e.time}}">Event time</td>
+	    </tr>
+	  </tbody>
 
   </div>
 
