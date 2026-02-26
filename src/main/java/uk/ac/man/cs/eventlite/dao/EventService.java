@@ -13,4 +13,10 @@ public interface EventService {
 	public Event save(Event event);
 	
 	public Optional<Event> findById(long id);
+	
+	// --- Organiser (logged-in user) ---
+	public Iterable<Event> findAllForUser(String ownerUsername);
+
+	public Event saveForUser(Event event, String ownerUsername);
+	
 }
