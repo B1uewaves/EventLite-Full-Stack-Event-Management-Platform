@@ -35,8 +35,11 @@ public class Security {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-//				// By default, all requests are authenticated except our specific list.
+				
+				// By default, all requests are authenticated except our specific list.
 				.authorizeHttpRequests(auth -> auth
+				
+				.requestMatchers(H2_CONSOLE).permitAll()
 				
 				// Public assets
 				.requestMatchers(mvc.matcher(HttpMethod.GET, "/webjars/**")).permitAll()
