@@ -35,7 +35,6 @@ public class InitialDataLoader {
 			if (eventService.count() > 0) {
 				log.info("Database already populated with events. Skipping event initialization.");
 			} else {
-				//events that were previously in events.json
                 Event e1 = new Event();
                 e1.setName("COMP23412 Showcase 01");
                 e1.setDate(LocalDate.of(2026, 5, 12));
