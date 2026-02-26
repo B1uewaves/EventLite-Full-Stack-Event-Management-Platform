@@ -22,8 +22,9 @@ public class EventsController {
 	@Autowired
 	private EventService eventService;
 
-//	@Autowired
-//	private VenueService venueService;
+
+
+
 
 	@ExceptionHandler(EventNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
@@ -46,12 +47,7 @@ public class EventsController {
 	public String getAllEvents(Model model) {
 
 		model.addAttribute("events", eventService.findAll());
-//		model.addAttribute("venues", venueService.findAll());
-
 		return "events/index";
 	}
 
 }
-
-// Exercise 2, Task 2: removed venueService after implementing many-to-one
-// relationship since events directly contain information about their venue
