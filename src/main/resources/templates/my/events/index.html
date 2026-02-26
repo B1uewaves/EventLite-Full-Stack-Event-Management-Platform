@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+  <title>My events</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <h1>My events</h1>
+
+  <p>
+    <a class="btn btn-primary" href="/my/events/new">Create event</a>
+  </p>
+
+  <table class="table table-striped" th:if="${events}">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Venue</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="e : ${events}">
+        <td th:text="${e.name}">Name</td>
+        <td th:text="${e.date}">Date</td>
+        <td th:text="${e.time}">Time</td>
+        <td th:text="${e.venue != null ? e.venue.name : '-'}">Venue</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p th:if="${#lists.isEmpty(events)}">No events yet.</p>
+</div>
+</body>
+</html>
