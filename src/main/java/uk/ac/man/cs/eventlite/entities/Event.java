@@ -33,6 +33,8 @@ public class Event {
 
 	private String name;
 	
+	private String ownerUsername;
+	
 	@ManyToOne	// Exercise 2, Task 1: relationship established since -- "An event is run at one venue"
 	@JoinColumn(name = "venue_id")
 	private Venue venue; 
@@ -73,6 +75,14 @@ public class Event {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	public String getOwnerUsername() {
+		return ownerUsername;
+	}
+
+	public void setOwnerUsername(String ownerUsername) {
+		this.ownerUsername = ownerUsername;
 	}
 
 	public Venue getVenue() {	

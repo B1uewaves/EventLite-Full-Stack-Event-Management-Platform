@@ -22,31 +22,54 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class Security {
 
 	public static final String ADMIN_ROLE = "ADMINISTRATOR";
+	public static final String USER_ROLE = "USER";
 
 	// List the mappings/methods for which no authorisation is required.
 	// By default we allow all GETs and full access to the H2 console.
 	private static final PathPatternRequestMatcher.Builder mvc = PathPatternRequestMatcher.withDefaults();
 	private static final RequestMatcher H2_CONSOLE = mvc.matcher("/h2-console/**");
 
-	private static final RequestMatcher[] NO_AUTH = { mvc.matcher(HttpMethod.GET, "/webjars/**"),
-			mvc.matcher(HttpMethod.GET, "/**"), H2_CONSOLE };
+//	private static final RequestMatcher[] NO_AUTH = { mvc.matcher(HttpMethod.GET, "/webjars/**"),
+//			mvc.matcher(HttpMethod.GET, "/**"), H2_CONSOLE };
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
+				
 				// By default, all requests are authenticated except our specific list.
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers(NO_AUTH).permitAll().anyRequest().hasRole(ADMIN_ROLE))
+				.authorizeHttpRequests(auth -> auth
+				
+				.requestMatchers(H2_CONSOLE).permitAll()
+				
+				// Public assets
+				.requestMatchers(mvc.matcher(HttpMethod.GET, "/webjars/**")).permitAll()
+				
+				// Organiser space (must be logged in)
+				.requestMatchers(mvc.matcher("/my/**")).authenticated()
+				
+				// Admin space
+				.requestMatchers(mvc.matcher("/admin/**")).hasRole(ADMIN_ROLE)
+				
+				// Public pages (all GETs)
+				.requestMatchers(mvc.matcher(HttpMethod.GET, "/**")).permitAll()
+				
+				// Everything else (POST/PUT/DELETE outside /my and /admin)
+				.anyRequest().denyAll()
+				)
 
 				// This makes testing easier. Given we're not going into production, that's OK.
 				.sessionManagement(session -> session.requireExplicitAuthenticationStrategy(false))
 
 				// Use form login/logout for the Web.
-				.formLogin(login -> login.loginPage("/sign-in").permitAll())
+				.formLogin(login -> login
+					.loginPage("/sign-in")
+				    .loginProcessingUrl("/sign-in")
+				    .permitAll()
+				)
 				.logout(logout -> logout.logoutUrl("/sign-out").logoutSuccessUrl("/").permitAll())
 
 				// Use HTTP basic for the API.
-				.httpBasic(withDefaults()).securityMatcher(mvc.matcher("/api/**"))
+				.httpBasic(withDefaults())
 
 				// Only use CSRF for Web requests.
 				// Disable CSRF for the API and H2 console.
@@ -65,12 +88,11 @@ public class Security {
 
 		UserDetails rob = User.withUsername("Rob").password(encoder.encode("Haines")).roles(ADMIN_ROLE).build();
 		UserDetails caroline = User.withUsername("Caroline").password(encoder.encode("Jay")).roles(ADMIN_ROLE).build();
-		UserDetails duncan = User.withUsername("Duncan").password(encoder.encode("Hull")).roles(ADMIN_ROLE).build();
-		UserDetails markel = User.withUsername("Markel").password(encoder.encode("Vigo")).roles(ADMIN_ROLE).build();
-		UserDetails mustafa = User.withUsername("Mustafa").password(encoder.encode("Mustafa")).roles(ADMIN_ROLE)
-				.build();
-		UserDetails tom = User.withUsername("Tom").password(encoder.encode("Carroll")).roles(ADMIN_ROLE).build();
-
-		return new InMemoryUserDetailsManager(rob, caroline, duncan, markel, mustafa, tom);
+		UserDetails duncan = User.withUsername("Duncan").password(encoder.encode("Hull")).roles(USER_ROLE).build();
+		UserDetails markel = User.withUsername("Markel").password(encoder.encode("Vigo")).roles(USER_ROLE).build();
+		UserDetails mustafa = User.withUsername("Mustafa").password(encoder.encode("Mustafa")).roles(USER_ROLE).build();
+		UserDetails tom = User.withUsername("Tom").password(encoder.encode("Carroll")).roles(USER_ROLE).build();
+		UserDetails alice = User.withUsername("Alice").password(encoder.encode("Password")).roles(USER_ROLE).build();
+		return new InMemoryUserDetailsManager(rob, caroline, duncan, markel, mustafa, tom, alice);
 	}
 }

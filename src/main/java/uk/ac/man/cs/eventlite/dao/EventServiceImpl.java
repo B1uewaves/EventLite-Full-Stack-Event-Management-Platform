@@ -49,4 +49,15 @@ public class EventServiceImpl implements EventService {
 	public Optional<Event> findById(long id) {
 		return eventRepository.findById(id);
 	}
+	
+	@Override
+	public Iterable<Event> findAllForUser(String ownerUsername) {
+		return eventRepository.findByOwnerUsernameOrderByDateAscTimeAsc(ownerUsername);
+	}
+
+	@Override
+	public Event saveForUser(Event event, String ownerUsername) {
+		event.setOwnerUsername(ownerUsername);
+		return eventRepository.save(event);
+	}
 }
