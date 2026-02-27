@@ -21,4 +21,6 @@ public interface EventService {
 
 	public Iterable<Event> search(String name);
 	
+	public void deleteById(long id);
+	
 }

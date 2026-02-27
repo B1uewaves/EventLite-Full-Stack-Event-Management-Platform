@@ -20,6 +20,7 @@
         <th>Date</th>
         <th>Time</th>
         <th>Venue</th>
+		<th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -28,6 +29,15 @@
         <td th:text="${e.date}">Date</td>
         <td th:text="${e.time}">Time</td>
         <td th:text="${e.venue != null ? e.venue.name : '-'}">Venue</td>
+		<td>
+		  <form th:action="@{/my/events/{id}(id=${e.id})}"
+		        th:method="delete"
+		        style="display:inline">
+		    <button type="submit" class="btn btn-danger btn-sm">
+		      Delete
+		    </button>
+		  </form>
+		</td>
       </tr>
     </tbody>
   </table>

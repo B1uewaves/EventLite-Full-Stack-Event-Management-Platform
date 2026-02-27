@@ -9,6 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.entities.Event;
@@ -37,5 +40,15 @@ public class MyEventsController {
 	public String createEvent(Event event, Principal principal) {
 		eventService.saveForUser(event, principal.getName());
 		return "redirect:/my/events";
+	}
+	
+	@DeleteMapping("/{id}")
+	public String deleteEvent(@PathVariable("id") long id,
+	                          RedirectAttributes redirectAttrs) {
+
+	    eventService.deleteById(id);
+	    redirectAttrs.addFlashAttribute("ok_message", "Event deleted.");
+
+	    return "redirect:/my/events";
 	}
 }
