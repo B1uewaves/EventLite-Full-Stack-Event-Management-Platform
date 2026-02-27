@@ -60,4 +60,9 @@ public class EventServiceImpl implements EventService {
 		event.setOwnerUsername(ownerUsername);
 		return eventRepository.save(event);
 	}
+
+	@Override
+	public Iterable<Event> search(String name) {
+		return eventRepository.findByNameContainingIgnoreCase(name);
+	}
 }

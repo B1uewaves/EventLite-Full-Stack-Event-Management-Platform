@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
@@ -44,9 +45,13 @@ public class EventsController {
 	}
 
 	@GetMapping
-	public String getAllEvents(Model model) {
-
-		model.addAttribute("events", eventService.findAll());
+	public String getAllEvents(@RequestParam(required = false) String search, Model model) {
+		if (search != null && !search.trim().isEmpty()) {
+			model.addAttribute("events", eventService.search(search.trim()));
+			model.addAttribute("searchTerm", search);
+		} else {
+			model.addAttribute("events", eventService.findAll());
+		}
 		return "events/index";
 	}
 

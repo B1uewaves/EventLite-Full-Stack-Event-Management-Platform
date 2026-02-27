@@ -18,5 +18,7 @@ public interface EventService {
 	public Iterable<Event> findAllForUser(String ownerUsername);
 
 	public Event saveForUser(Event event, String ownerUsername);
+
+	public Iterable<Event> search(String name);
 	
 }
