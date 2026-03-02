@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
+import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
 
 @Controller
@@ -19,6 +20,9 @@ public class MyEventsController {
 
 	@Autowired
 	private EventService eventService;
+	
+	@Autowired
+	private VenueService venueService;
 
 	@GetMapping
 	public String index(Model model, Principal principal) {
@@ -30,6 +34,7 @@ public class MyEventsController {
 	@GetMapping("/new")
 	public String newEvent(Model model) {
 		model.addAttribute("event", new Event());
+		model.addAttribute("venues", venueService.findAll());
 		return "my/events/new";
 	}
 
