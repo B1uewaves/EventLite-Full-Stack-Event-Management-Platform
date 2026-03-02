@@ -22,6 +22,8 @@ public class EventsController {
 
 	@Autowired
 	private EventService eventService;
+	@Autowired
+	private VenueService venueService;
 
 
 
@@ -52,6 +54,7 @@ public class EventsController {
 		} else {
 			model.addAttribute("events", eventService.findAll());
 		}
+		model.addAttribute("venues", venueService.findAll());
 		return "events/index";
 	}
 
