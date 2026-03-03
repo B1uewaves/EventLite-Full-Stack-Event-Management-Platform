@@ -5,16 +5,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import jakarta.validation.Valid;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
+import uk.ac.man.cs.eventlite.entities.Event;
 
 @Controller
 @RequestMapping(value = "/events", produces = { MediaType.TEXT_HTML_VALUE })
@@ -22,6 +27,8 @@ public class EventsController {
 
 	@Autowired
 	private EventService eventService;
+	@Autowired
+	private VenueService venueService;
 
 
 
@@ -52,7 +59,33 @@ public class EventsController {
 		} else {
 			model.addAttribute("events", eventService.findAll());
 		}
+		model.addAttribute("venues", venueService.findAll());
 		return "events/index";
 	}
+
+    @GetMapping("/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") long id, Model model) {
+        return eventService.findById(id).map(event -> {
+            model.addAttribute("event", event);
+            model.addAttribute("venues", venueService.findAll());
+            return "events/update";
+        }).orElseThrow(() -> new EventNotFoundException(id));
+    }
+
+    @PostMapping("/update/{id}")
+    public String updateEvent(@PathVariable("id") long id, 
+                             @Valid @ModelAttribute("event") Event event, 
+                             BindingResult result, 
+                             Model model) {
+        
+        if (result.hasErrors()) {
+            model.addAttribute("venues", venueService.findAll());
+            return "events/update";
+        }
+
+        event.setId(id);
+        eventService.save(event);
+        return "redirect:/events";
+    }
 
 }

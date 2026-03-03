@@ -24,6 +24,7 @@
           <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
           <th><i class="fa-solid fa-calendar"></i> Date</th>
           <th><i class="fa-solid fa-clock"></i> Time</th>
+          <th><i class="fa-solid fa-gear"></i> Actions</th> </tr>
         </tr>
       </thead>
 	  <tbody>
@@ -36,8 +37,23 @@
 	      <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
 	      <td th:text="${{e.date}}">Event date</td>
 	      <td th:text="${{e.time}}">Event time</td>
+
+        <td style="position: relative; z-index: 10;"> 
+          <div class="btn-group" role="group">
+            <a th:href="@{/events/edit/{id}(id=${e.id})}" class="btn btn-sm btn-warning">
+              <i class="fa-solid fa-pen-to-square"></i> edit
+            </a>
+          </div>
+        </td>
 	    </tr>
 	  </tbody>
+  </table>
+
+  <div class="mt-3">
+    <a th:href="@{/events/new}" class="btn btn-primary">
+      <i class="fa-solid fa-plus"></i> Add New Event
+    </a>
+  </div>
 
   </div>
 

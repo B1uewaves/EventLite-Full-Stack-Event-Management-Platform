@@ -1,15 +1,38 @@
-<!-- Implement the events detail page in here -->>
-
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/default}">
 <head>
-  <title>Event</title>
+  <title>Event Details</title>
 </head>
 <body>
 <div layout:fragment="content">
-  <!-- Event detail page (to be implemented) -->
+  <div class="card mt-4">
+    <div class="card-header">
+      <h2 th:text="${event.name}">Event Name</h2>
+    </div>
+    <div class="card-body">
+      <p>
+        <strong>Date:</strong>
+        <span th:text="${event.date}">Event Date</span>
+      </p>
+      <p>
+        <strong>Time:</strong>
+        <span th:text="${event.time}">Event Time</span>
+      </p>
+      <p>
+        <strong>Venue:</strong>
+        <span th:text="${event.venue != null ? event.venue.name : 'Venue TBC'}">Venue Name</span>
+      </p>
+      <p>
+        <strong>Description:</strong>
+        <span th:text="${event.description}">Event Description</span>
+      </p>
+    </div>
+    <div class="card-footer">
+      <a class="btn btn-secondary" th:href="@{/events}">Back to all events</a>
+    </div>
+  </div>
 </div>
 </body>
 </html>
