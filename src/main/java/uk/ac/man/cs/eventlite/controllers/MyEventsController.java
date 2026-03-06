@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
@@ -45,7 +46,7 @@ public class MyEventsController {
 
 
 	@PostMapping
-	public String createEvent(@Valid Event event,
+	public String createEvent(@Valid @ModelAttribute("event") Event event,
 	                          BindingResult result,
 	                          Principal principal,
 	                          Model model) {

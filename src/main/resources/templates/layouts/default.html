@@ -57,11 +57,12 @@
               <i class="fa-solid fa-user" aria-hidden="true"></i>
               <span>Logged in as </span><strong sec:authentication="name"></strong>
             </span>
-            <form th:action="@{/logout}" method="post" class="m-0">
-              <button type="submit" class="btn btn-warning">
-                <i class="fa-solid fa-sign-out-alt" aria-hidden="true"></i> Logout
-              </button>
-            </form>
+			<form th:action="@{/sign-out}" method="post" class="m-0">
+			  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			  <button type="submit" class="btn btn-warning">
+			    <i class="fa-solid fa-sign-out-alt" aria-hidden="true"></i> Logout
+			  </button>
+			</form>
           </div>
         </div>
       </div>
