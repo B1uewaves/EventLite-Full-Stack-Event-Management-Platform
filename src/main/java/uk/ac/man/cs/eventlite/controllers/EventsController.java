@@ -21,6 +21,8 @@ import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 import uk.ac.man.cs.eventlite.entities.Event;
 
+import java.security.Principal;
+
 @Controller
 @RequestMapping(value = "/events", produces = { MediaType.TEXT_HTML_VALUE })
 public class EventsController {
@@ -63,29 +65,44 @@ public class EventsController {
 		return "events/index";
 	}
 
-    @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, Model model) {
-        return eventService.findById(id).map(event -> {
-            model.addAttribute("event", event);
-            model.addAttribute("venues", venueService.findAll());
-            return "events/update";
-        }).orElseThrow(() -> new EventNotFoundException(id));
-    }
+	@GetMapping("/edit/{id}")
+	public String showUpdateForm(@PathVariable("id") long id, Model model, Principal principal) {
+	    return eventService.findById(id).map(event -> {
+	        if (!event.getOwnerUsername().equals(principal.getName())) {
+	            return "redirect:/events";
+	        }
 
-    @PostMapping("/update/{id}")
-    public String updateEvent(@PathVariable("id") long id, 
-                             @Valid @ModelAttribute("event") Event event, 
-                             BindingResult result, 
-                             Model model) {
-        
-        if (result.hasErrors()) {
-            model.addAttribute("venues", venueService.findAll());
-            return "events/update";
-        }
+	        model.addAttribute("event", event);
+	        model.addAttribute("venues", venueService.findAll());
+	        return "events/update";
+	    }).orElseThrow(() -> new EventNotFoundException(id));
+	}
 
-        event.setId(id);
-        eventService.save(event);
-        return "redirect:/events";
-    }
+	@PostMapping("/update/{id}")
+	public String updateEvent(@PathVariable("id") long id,
+	                          @Valid @ModelAttribute("event") Event updatedEvent,
+	                          BindingResult result,
+	                          Model model,
+	                          Principal principal) {
+
+	    if (result.hasErrors()) {
+	        model.addAttribute("venues", venueService.findAll());
+	        return "events/update";
+	    }
+
+	    return eventService.findById(id).map(existingEvent -> {
+	        if (!existingEvent.getOwnerUsername().equals(principal.getName())) {
+	            return "redirect:/events";
+	        }
+
+	        existingEvent.setName(updatedEvent.getName());
+	        existingEvent.setDate(updatedEvent.getDate());
+	        existingEvent.setTime(updatedEvent.getTime());
+	        existingEvent.setVenue(updatedEvent.getVenue());
+
+	        eventService.save(existingEvent);
+	        return "redirect:/events";
+	    }).orElseThrow(() -> new EventNotFoundException(id));
+	}
 
 }
