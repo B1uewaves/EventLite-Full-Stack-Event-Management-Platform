@@ -31,12 +31,14 @@
 	    <div class="text-danger" th:if="${#fields.hasErrors('time')}" th:errors="*{time}"></div>
 	  </div>
 	  
-	  <div class="mb-3">
-	    <label class="form-label">Venue</label>
-	    <select th:field="*{venue}" class="form-select">
-	      <option th:each="v : ${venues}" th:value="${v.id}" th:text="${v.name}">Venue</option>
+	  <div class="form-group">
+	    <label for="venue">Venue</label>
+	    <select class="form-control" id="venue" th:field="*{venue.id}">
+	        <option value="" disabled selected>Select a venue</option>
+	        <option th:each="v : ${venues}" th:value="${v.id}" th:text="${v.name}">
+	        </option>
+
 	    </select>
-	    <div class="text-danger" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></div>
 	  </div>
 
 	  <div class="mb-3">

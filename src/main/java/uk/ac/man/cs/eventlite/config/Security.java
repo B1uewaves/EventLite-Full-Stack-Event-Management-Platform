@@ -54,10 +54,13 @@ public class Security {
 				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/update/*")).authenticated()
 				
 				// Public pages (all GETs)
+				// Allow event creation
+				.requestMatchers(mvc.matcher(HttpMethod.POST, "/my/events")).authenticated()
+
+				// Public pages (all GETs)
 				.requestMatchers(mvc.matcher(HttpMethod.GET, "/**")).permitAll()
-				
 				// Everything else (POST/PUT/DELETE outside /my and /admin)
-				.anyRequest().denyAll()
+				.anyRequest().authenticated()
 				)
 
 				// This makes testing easier. Given we're not going into production, that's OK.

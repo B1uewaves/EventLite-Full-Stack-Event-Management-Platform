@@ -15,7 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.NotBlank;
 
@@ -31,8 +31,8 @@ public class Event {
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	@NotNull
-	@Future
+	@NotNull(message = "Please select a date")
+	@FutureOrPresent(message = "Event date cannot be in the past")
 	private LocalDate date;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
