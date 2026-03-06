@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import uk.ac.man.cs.eventlite.dao.EventService;
@@ -66,7 +67,10 @@ public class EventsController {
 	}
 
 	@GetMapping("/edit/{id}")
-	public String showUpdateForm(@PathVariable("id") long id, Model model, Principal principal) {
+	public String showUpdateForm(@PathVariable("id") long id,
+	                             @RequestParam(value = "redirect", required = false) String redirect,
+	                             Model model,
+	                             Principal principal) {
 	    return eventService.findById(id).map(event -> {
 	        if (!event.getOwnerUsername().equals(principal.getName())) {
 	            return "redirect:/events";
@@ -74,6 +78,7 @@ public class EventsController {
 
 	        model.addAttribute("event", event);
 	        model.addAttribute("venues", venueService.findAll());
+	        model.addAttribute("redirect", redirect);
 	        return "events/update";
 	    }).orElseThrow(() -> new EventNotFoundException(id));
 	}
@@ -82,11 +87,13 @@ public class EventsController {
 	public String updateEvent(@PathVariable("id") long id,
 	                          @Valid @ModelAttribute("event") Event updatedEvent,
 	                          BindingResult result,
+	                          @RequestParam(value = "redirect", required = false) String redirect,
 	                          Model model,
 	                          Principal principal) {
 
 	    if (result.hasErrors()) {
 	        model.addAttribute("venues", venueService.findAll());
+	        model.addAttribute("redirect", redirect);
 	        return "events/update";
 	    }
 
@@ -99,8 +106,14 @@ public class EventsController {
 	        existingEvent.setDate(updatedEvent.getDate());
 	        existingEvent.setTime(updatedEvent.getTime());
 	        existingEvent.setVenue(updatedEvent.getVenue());
+	        existingEvent.setDescription(updatedEvent.getDescription());
 
 	        eventService.save(existingEvent);
+
+	        if (redirect != null && !redirect.isBlank()) {
+	            return "redirect:" + redirect;
+	        }
+
 	        return "redirect:/events";
 	    }).orElseThrow(() -> new EventNotFoundException(id));
 	}

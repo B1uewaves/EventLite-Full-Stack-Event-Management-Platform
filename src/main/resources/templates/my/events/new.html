@@ -12,7 +12,7 @@
   <form th:action="@{/my/events}" method="post" th:object="${event}">
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
     <div class="form-group">
-      <label for="name">Name</label>
+      <label for="name">Event Name</label>
       <input class="form-control" id="name" type="text" th:field="*{name}" required />
     </div>
 

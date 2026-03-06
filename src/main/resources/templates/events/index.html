@@ -49,11 +49,12 @@
 		  <!-- Actions column -->
 		  <td style="position: relative; z-index: 10;">
 		    <div class="btn-group" role="group">
-		      <a th:if="${#authentication.name == e.ownerUsername}"
-		         th:href="@{/events/edit/{id}(id=${e.id})}"
-		         class="btn btn-sm btn-warning">
-		        <i class="fa-solid fa-pen-to-square"></i> edit
-		      </a>
+				<a sec:authorize="isAuthenticated()"
+				   th:if="${#authentication.name == e.ownerUsername}"
+				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
+				   class="btn btn-sm btn-outline-primary">
+				   <i class="fa-solid fa-pen-to-square"></i> Edit
+				</a>
 		    </div>
 		  </td>
 	    </tr>
