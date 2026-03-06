@@ -7,6 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -39,12 +40,14 @@ public class Event {
 	@DateTimeFormat(pattern = "HH:mm")
 	private LocalTime time;
 	
-	@NotBlank
+	@NotBlank(message = "Event name is required")
 	@Size(max = 255)
+	@Column(length = 255)
 	private String name;
-	
-	@Size(max = 500)
-    private String description;
+
+	@Size(max = 500, message = "Description must be less than 500 characters")
+	@Column(length = 500)
+	private String description;
 	
 	private String ownerUsername;
 	
