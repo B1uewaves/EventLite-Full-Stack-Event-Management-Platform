@@ -11,10 +11,13 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping(value = "/my/events", produces = { MediaType.TEXT_HTML_VALUE })
@@ -43,8 +46,17 @@ public class MyEventsController {
 
 
 	@PostMapping
-	public String createEvent(Event event, Principal principal) {
-		eventService.saveForUser(event, principal.getName());
-		return "redirect:/my/events";
+	public String createEvent(@Valid @ModelAttribute("event") Event event,
+	                          BindingResult result,
+	                          Principal principal,
+	                          Model model) {
+
+	    if (result.hasErrors()) {
+	        model.addAttribute("venues", venueService.findAll());
+	        return "my/events/new";
+	    }
+
+	    eventService.saveForUser(event, principal.getName());
+	    return "redirect:/my/events";
 	}
 }

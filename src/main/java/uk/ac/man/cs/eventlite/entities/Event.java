@@ -14,6 +14,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
+
+
 
 @Entity
 @Table(name = "events")
@@ -25,18 +31,24 @@ public class Event {
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
+	@NotNull
+	@Future
 	private LocalDate date;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING)
 	@DateTimeFormat(pattern = "HH:mm")
 	private LocalTime time;
-
+	
+	@NotBlank
+	@Size(max = 255)
 	private String name;
 	
+	@Size(max = 500)
     private String description;
 	
 	private String ownerUsername;
 	
+	@NotNull
 	@ManyToOne	// Exercise 2, Task 1: relationship established since -- "An event is run at one venue"
 	@JoinColumn(name = "venue_id")
 	private Venue venue; 
