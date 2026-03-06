@@ -52,7 +52,7 @@ public class EventsController {
 	}
 
 	@GetMapping
-	public String getAllEvents(@RequestParam(required = false) String search, Model model) {
+	public String getAllEvents(@RequestParam(value = "search", required = false) String search, Model model) {
 		if (search != null && !search.trim().isEmpty()) {
 			model.addAttribute("events", eventService.search(search.trim()));
 			model.addAttribute("searchTerm", search);
