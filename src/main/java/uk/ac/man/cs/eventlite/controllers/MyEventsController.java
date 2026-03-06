@@ -2,9 +2,11 @@ package uk.ac.man.cs.eventlite.controllers;
 
 import java.security.Principal;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +39,8 @@ public class MyEventsController {
 		model.addAttribute("venues", venueService.findAll());
 		return "my/events/new";
 	}
+
+
 
 	@PostMapping
 	public String createEvent(Event event, Principal principal) {
