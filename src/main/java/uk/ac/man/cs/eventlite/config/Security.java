@@ -50,6 +50,9 @@ public class Security {
 				// Admin space
 				.requestMatchers(mvc.matcher("/admin/**")).hasRole(ADMIN_ROLE)
 				
+				//update events
+				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/update/*")).authenticated()
+				
 				// Public pages (all GETs)
 				.requestMatchers(mvc.matcher(HttpMethod.GET, "/**")).permitAll()
 				
