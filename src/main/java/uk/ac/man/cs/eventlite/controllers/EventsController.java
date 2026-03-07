@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestParam;
+import java.time.LocalDate;
 
 import jakarta.validation.Valid;
 import uk.ac.man.cs.eventlite.dao.EventService;
@@ -60,6 +61,9 @@ public class EventsController {
 			model.addAttribute("events", eventService.search(search.trim()));
 			model.addAttribute("searchTerm", search);
 		} else {
+			LocalDate today = LocalDate.now();
+			model.addAttribute("upcomingEvents", eventService.findUpcomingEvents(today));
+			model.addAttribute("pastEvents", eventService.findPastEvents(today));
 			model.addAttribute("events", eventService.findAll());
 		}
 		model.addAttribute("venues", venueService.findAll());
