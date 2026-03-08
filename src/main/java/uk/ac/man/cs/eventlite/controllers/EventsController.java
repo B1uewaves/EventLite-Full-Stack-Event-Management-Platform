@@ -22,6 +22,7 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 import uk.ac.man.cs.eventlite.entities.Event;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
 
@@ -70,13 +71,15 @@ public class EventsController {
 		return "events/index";
 	}
 
+
 	@GetMapping("/edit/{id}")
 	public String showUpdateForm(@PathVariable("id") long id,
 	                             @RequestParam(value = "redirect", required = false) String redirect,
 	                             Model model,
-	                             Principal principal) {
+	                             Principal principal,
+								 HttpServletRequest request) {
 	    return eventService.findById(id).map(event -> {
-	        if (!event.getOwnerUsername().equals(principal.getName())) {
+	        if (!event.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
 	            return "redirect:/events";
 	        }
 
@@ -93,7 +96,8 @@ public class EventsController {
 	                          BindingResult result,
 	                          @RequestParam(value = "redirect", required = false) String redirect,
 	                          Model model,
-	                          Principal principal) {
+	                          Principal principal,
+							  HttpServletRequest request) {
 
 	    if (result.hasErrors()) {
 	        model.addAttribute("venues", venueService.findAll());
@@ -102,7 +106,7 @@ public class EventsController {
 	    }
 
 	    return eventService.findById(id).map(existingEvent -> {
-	        if (!existingEvent.getOwnerUsername().equals(principal.getName())) {
+	        if (!existingEvent.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
 	            return "redirect:/events";
 	        }
 

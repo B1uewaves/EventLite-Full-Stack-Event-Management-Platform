@@ -78,8 +78,8 @@
 		  <!-- Actions column -->
 		  <td sec:authorize="isAuthenticated()" style="position: relative; z-index: 10;">
 		    <div class="btn-group" role="group">
-				<a 
-				   th:if="${#authentication.name == e.ownerUsername}"
+				<a sec:authorize="isAuthenticated()"
+				   th:if="${#authentication.name == e.ownerUsername or #authorization.expression('hasRole(''ADMINISTRATOR'')')}"
 				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
 				   class="btn btn-sm btn-outline-primary">
 				   <i class="fa-solid fa-pen-to-square"></i> Edit
