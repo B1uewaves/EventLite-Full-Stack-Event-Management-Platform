@@ -1,170 +1,63 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
-	  
-      layout:decorate="~{layouts/default}">
-<head>
-  <title>All events</title>
-  <!--style added to fix the extra line above table headers (bootstraps css adds an extra line above) -->
-	<style>
-	.events-table > thead {
-		border-top: 0 !important;
-	}
-	</style>
-</head>
-<body>
-  <div layout:fragment="content">
-    <h1>All events</h1>
+<!doctype html>
+<html>
+  <head>
+    <title>EventLite Home</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/webjars/font-awesome/css/all.min.css" />
+  </head>
 
-    <form method="get" action="/events" class="mb-3">
-      <div class="input-group">
-        <input type="text" name="search" class="form-control" 
-               placeholder="Search events..." th:value="${searchTerm}">
-        <button type="submit" class="btn btn-primary">Search</button>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+      <div class="container">
+        <a class="navbar-brand" href="/">EventLite</a>
+
+        <div class="collapse navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/events">Browse Events</a>
+            </li>
+          </ul>
+
+          <!-- Create Event Button (Option C route) -->
+          <a class="btn btn-primary" href="/admin/events/new">
+            <i class="fas fa-plus"></i> Create Event
+          </a>
+        </div>
       </div>
-    </form>
+    </nav>
 
+    <!-- MAIN CONTENT -->
+    <div class="container">
+      <h1>EventLite</h1>
 
+      <form method="get" action="/events" class="mb-3">
+        <div class="input-group">
+          <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Search events..."
+            th:value="${searchTerm}"
+          />
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
 
-	<h2>Upcoming Events</h2>
-    <table class="table table-striped table-hover events-table">
-		<!-- col group added to make table sizes teh same for upcoming and past evnets -->
-		<colgroup sec:authorize="isAuthenticated()">
-			<col style="width: 26%">
-			<col style="width: 20%">
-			<col style="width: 14%">
-			<col style="width: 12%">
-			<col style="width: 18%">
-			<col style="width: 10%">
-		</colgroup>
+      <p>
+        This is EventLite. See the
+        <a href="/events">list of events</a>
+        for more information.
+      </p>
+    </div>
 
-		<colgroup sec:authorize="!isAuthenticated()">
-			<col style="width: 29%">
-			<col style="width: 23%">
-			<col style="width: 16%">
-			<col style="width: 14%">
-			<col style="width: 18%">
-		</colgroup>
-
-		<thead>
-		  <tr>
-		    <th><i class="fa-solid fa-bolt"></i> Event</th>
-		    <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
-		    <th><i class="fa-solid fa-calendar"></i> Date</th>
-		    <th><i class="fa-solid fa-clock"></i> Time</th>
-		    <th><i class="fa-solid fa-user"></i> Organiser</th>
-		    <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
-		  </tr>
-		</thead>
-	  <tbody>
-		<tr th:each="e : ${upcomingEvents}" class="position-relative">
-		  <td>
-		    <a class="stretched-link text-decoration-none"
-		       th:href="@{/events/{id}(id=${e.id})}"
-		       th:text="${e.name}">My Event</a>
-		  </td>
-	      <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
-	      <td th:text="${{e.date}}">Event date</td>
-	      <td th:text="${{e.time}}">Event time</td>
-
-		  <!-- Organiser column -->
-		  <td>
-		    <span th:text="${e.ownerUsername}">Owner</span>
-		    <span th:if="${#authentication.name == e.ownerUsername}"
-		          class="text-muted ms-1">(you)</span>
-		  </td>
-
-		  <!-- Actions column -->
-		  <td sec:authorize="isAuthenticated()" style="position: relative; z-index: 10;">
-		    <div class="btn-group" role="group">
-				<a sec:authorize="isAuthenticated()"
-				   th:if="${#authentication.name == e.ownerUsername or #authorization.expression('hasRole(''ADMINISTRATOR'')')}"
-				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
-				   class="btn btn-sm btn-outline-primary">
-				   <i class="fa-solid fa-pen-to-square"></i> Edit
-				</a>
-		    </div>
-		  </td>
-	    </tr>
-	  </tbody>
-  </table>
-
-
-
-	<h2>Past Events</h2>
-    <table class="table table-striped table-hover events-table">
-		<!-- col group added to make table sizes teh same for upcoming and past evnets -->
-		<colgroup sec:authorize="isAuthenticated()">
-			<col style="width: 26%">
-			<col style="width: 20%">
-			<col style="width: 14%">
-			<col style="width: 12%">
-			<col style="width: 18%">
-			<col style="width: 10%">
-		</colgroup>
-
-		<colgroup sec:authorize="!isAuthenticated()">
-			<col style="width: 29%">
-			<col style="width: 23%">
-			<col style="width: 16%">
-			<col style="width: 14%">
-			<col style="width: 18%">
-		</colgroup>
-
-		<thead>
-		  <tr>
-		    <th><i class="fa-solid fa-bolt"></i> Event</th>
-		    <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
-		    <th><i class="fa-solid fa-calendar"></i> Date</th>
-		    <th><i class="fa-solid fa-clock"></i> Time</th>
-		    <th><i class="fa-solid fa-user"></i> Organiser</th>
-		    <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
-		  </tr>
-		</thead>
-
-	
-	  <tbody>
-		<tr th:each="e : ${pastEvents}" class="position-relative">
-		  <td>
-		    <a class="stretched-link text-decoration-none"
-		       th:href="@{/events/{id}(id=${e.id})}"
-		       th:text="${e.name}">My Event</a>
-		  </td>
-	      <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
-	      <td th:text="${{e.date}}">Event date</td>
-	      <td th:text="${{e.time}}">Event time</td>
-
-		  <!-- Organiser column -->
-		  <td>
-		    <span th:text="${e.ownerUsername}">Owner</span>
-		    <span th:if="${#authentication.name == e.ownerUsername}"
-		          class="text-muted ms-1">(you)</span>
-		  </td>
-
-		  <!-- Actions column -->
-		  <td sec:authorize="isAuthenticated()" style="position: relative; z-index: 10;">
-		    <div class="btn-group" role="group">
-				<a
-				   th:if="${#authentication.name == e.ownerUsername}"
-				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
-				   class="btn btn-sm btn-outline-primary">
-				   <i class="fa-solid fa-pen-to-square"></i> Edit
-				</a>
-		    </div>
-		  </td>
-	    </tr>
-	  </tbody>
-  </table>
-
-
-
-
-  </div>
-
-
-
-
-  
-</body>
+    <script src="/webjars/popper.js/umd/popper.min.js"></script>
+    <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+  </body>
 </html>
