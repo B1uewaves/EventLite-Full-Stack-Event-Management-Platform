@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.validation.Valid;
 import uk.ac.man.cs.eventlite.dao.EventService;
@@ -34,10 +36,6 @@ public class EventsController {
 	private EventService eventService;
 	@Autowired
 	private VenueService venueService;
-
-
-
-
 
 	@ExceptionHandler(EventNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
@@ -59,7 +57,22 @@ public class EventsController {
 	@GetMapping
 	public String getAllEvents(@RequestParam(value = "search", required = false) String search, Model model) {
 		if (search != null && !search.trim().isEmpty()) {
-			model.addAttribute("events", eventService.search(search.trim()));
+			LocalDate today = LocalDate.now();
+			Iterable<Event> searchResults = eventService.search(search.trim());
+
+			List<Event> upcomingEvents = new ArrayList<>();
+			List<Event> pastEvents = new ArrayList<>();
+
+			for (Event event : searchResults) {
+				if (event.getDate().isBefore(today)) {
+					pastEvents.add(event);
+				} else {
+					upcomingEvents.add(event);
+				}
+			}
+
+			model.addAttribute("upcomingEvents", upcomingEvents);
+			model.addAttribute("pastEvents", pastEvents);
 			model.addAttribute("searchTerm", search);
 		} else {
 			LocalDate today = LocalDate.now();
@@ -71,59 +84,59 @@ public class EventsController {
 		return "events/index";
 	}
 
-
 	@GetMapping("/edit/{id}")
 	public String showUpdateForm(@PathVariable("id") long id,
-	                             @RequestParam(value = "redirect", required = false) String redirect,
-	                             Model model,
-	                             Principal principal,
-								 HttpServletRequest request) {
-	    return eventService.findById(id).map(event -> {
-	        if (!event.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
-	            return "redirect:/events";
-	        }
+			@RequestParam(value = "redirect", required = false) String redirect,
+			Model model,
+			Principal principal,
+			HttpServletRequest request) {
+		return eventService.findById(id).map(event -> {
+			if (!event.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
+				return "redirect:/events";
+			}
 
-	        model.addAttribute("event", event);
-	        model.addAttribute("venues", venueService.findAll());
-	        model.addAttribute("redirect", redirect);
-	        return "events/update";
-	    }).orElseThrow(() -> new EventNotFoundException(id));
+			model.addAttribute("event", event);
+			model.addAttribute("venues", venueService.findAll());
+			model.addAttribute("redirect", redirect);
+			return "events/update";
+		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
 
 	@PostMapping("/update/{id}")
 	public String updateEvent(@PathVariable("id") long id,
-	                          @Valid @ModelAttribute("event") Event updatedEvent,
-	                          BindingResult result,
-	                          @RequestParam(value = "redirect", required = false) String redirect,
-	                          Model model,
-	                          Principal principal,
-							  HttpServletRequest request) {
+			@Valid @ModelAttribute("event") Event updatedEvent,
+			BindingResult result,
+			@RequestParam(value = "redirect", required = false) String redirect,
+			Model model,
+			Principal principal,
+			HttpServletRequest request) {
 
-	    if (result.hasErrors()) {
-	        model.addAttribute("venues", venueService.findAll());
-	        model.addAttribute("redirect", redirect);
-	        return "events/update";
-	    }
+		if (result.hasErrors()) {
+			model.addAttribute("venues", venueService.findAll());
+			model.addAttribute("redirect", redirect);
+			return "events/update";
+		}
 
-	    return eventService.findById(id).map(existingEvent -> {
-	        if (!existingEvent.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
-	            return "redirect:/events";
-	        }
+		return eventService.findById(id).map(existingEvent -> {
+			if (!existingEvent.getOwnerUsername().equals(principal.getName())
+					&& !request.isUserInRole("ADMINISTRATOR")) {
+				return "redirect:/events";
+			}
 
-	        existingEvent.setName(updatedEvent.getName());
-	        existingEvent.setDate(updatedEvent.getDate());
-	        existingEvent.setTime(updatedEvent.getTime());
-	        existingEvent.setVenue(updatedEvent.getVenue());
-	        existingEvent.setDescription(updatedEvent.getDescription());
+			existingEvent.setName(updatedEvent.getName());
+			existingEvent.setDate(updatedEvent.getDate());
+			existingEvent.setTime(updatedEvent.getTime());
+			existingEvent.setVenue(updatedEvent.getVenue());
+			existingEvent.setDescription(updatedEvent.getDescription());
 
-	        eventService.save(existingEvent);
+			eventService.save(existingEvent);
 
-	        if (redirect != null && !redirect.isBlank()) {
-	            return "redirect:" + redirect;
-	        }
+			if (redirect != null && !redirect.isBlank()) {
+				return "redirect:" + redirect;
+			}
 
-	        return "redirect:/events";
-	    }).orElseThrow(() -> new EventNotFoundException(id));
+			return "redirect:/events";
+		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
 
 }
