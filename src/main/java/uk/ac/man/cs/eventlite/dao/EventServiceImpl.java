@@ -1,12 +1,18 @@
 package uk.ac.man.cs.eventlite.dao;
 
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.time.LocalDate;
+
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
@@ -22,34 +28,54 @@ public class EventServiceImpl implements EventService {
 
 	private final static String DATA = "data/events.json";
 
+	@Autowired
+	private EventRepository eventRepository;
+
 	@Override
 	public long count() {
-		long count = 0;
-		Iterator<Event> i = findAll().iterator();
-
-		for (; i.hasNext(); count++) {
-			i.next();
-		}
-
-		return count;
+		return eventRepository.count();
 	}
+
 
 	@Override
 	public Iterable<Event> findAll() {
-		ArrayList<Event> events = new ArrayList<Event>();
+		return eventRepository.findAllByOrderByDateAscTimeAsc();
+	}
 
-		try {
-			ObjectMapper mapper = new ObjectMapper();
-			mapper.registerModule(new JavaTimeModule());
+	@Override
+	public Event save(Event event) {
+		return eventRepository.save(event);
+	}
+	
+	@Override
+	public Optional<Event> findById(long id) {
+		return eventRepository.findById(id);
+	}
+	
+	@Override
+	public Iterable<Event> findAllForUser(String ownerUsername) {
+		return eventRepository.findByOwnerUsernameOrderByDateAscTimeAsc(ownerUsername);
+	}
 
-			InputStream in = new ClassPathResource(DATA).getInputStream();
+	@Override
+	public Event saveForUser(Event event, String ownerUsername) {
+		event.setOwnerUsername(ownerUsername);
+		return eventRepository.save(event);
+	}
 
-			events = mapper.readValue(in, mapper.getTypeFactory().constructCollectionType(List.class, Event.class));
-		} catch (Exception e) {
-			log.error("Exception while reading file '" + DATA + "': " + e);
-			// If we can't read the file, then the event list is empty...
-		}
+	@Override
+	public Iterable<Event> search(String name) {
+		return eventRepository.findByNameContainingIgnoreCase(name);
+	}
 
-		return events;
+
+	@Override
+	public Iterable<Event> findPastEvents(LocalDate currentDate) {
+		return eventRepository.findByDateBeforeOrderByDateDescTimeDesc(currentDate);
+	}
+
+	@Override
+	public Iterable<Event> findUpcomingEvents(LocalDate currentDate) {
+		return eventRepository.findByDateGreaterThanEqualOrderByDateAscTimeAsc(currentDate);
 	}
 }

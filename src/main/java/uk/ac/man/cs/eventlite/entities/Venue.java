@@ -1,6 +1,8 @@
 package uk.ac.man.cs.eventlite.entities;
 
 import jakarta.persistence.*; 
+import java.util.Set;
+
 
 @Entity
 @Table(name = "venues")
@@ -14,6 +16,9 @@ public class Venue {
 	private String name;
 
 	private int capacity;
+	
+	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
+	private Set<Event> events;
 
 	public Venue() {
 	}
@@ -40,5 +45,10 @@ public class Venue {
 
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
+		
+	}
+	
+	public Set<Event> getEvents() {
+	    return events; // returns all events hosted at a this venue
 	}
 }

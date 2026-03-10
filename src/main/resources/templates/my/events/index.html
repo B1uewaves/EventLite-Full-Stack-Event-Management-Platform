@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/default}">
+<head>
+  <title>My events</title>
+</head>
+<body>
+<div layout:fragment="content">
+  <h1>My events</h1>
+
+  <p>
+    <a class="btn btn-primary" href="/my/events/new">Create event</a>
+  </p>
+
+  <table class="table table-striped" th:if="${events}">
+	<thead>
+	  <tr>
+	    <th><i class="fa-solid fa-bolt"></i> Event</th>
+	    <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
+	    <th><i class="fa-solid fa-calendar"></i> Date</th>
+	    <th><i class="fa-solid fa-clock"></i> Time</th>
+	    <th><i class="fa-solid fa-user"></i> Organiser</th>
+	    <th><i class="fa-solid fa-gear"></i> Actions</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr th:each="e : ${events}">
+	    <td th:text="${e.name}">Event</td>
+
+	    <td th:text="${e.venue != null ? e.venue.name : '-'}">Venue</td>
+
+	    <td th:text="${e.date}">Date</td>
+
+	    <td th:text="${e.time}">Time</td>
+
+	    <td th:text="${e.ownerUsername}">Organiser</td>
+
+	    <td>
+	      <a class="btn btn-sm btn-outline-primary"
+	         th:href="@{/events/edit/{id}(id=${e.id}, redirect='/my/events')}">
+	         <i class="fa-solid fa-pen-to-square"></i> Edit
+	      </a>
+	    </td>
+	  </tr>
+	</tbody>
+
+  <p th:if="${#lists.isEmpty(events)}">No events yet.</p>
+</div>
+</body>
+</html>
