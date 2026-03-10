@@ -6,5 +6,5 @@ import uk.ac.man.cs.eventlite.entities.Venue;
 
 @Repository
 public interface VenueRepository extends JpaRepository<Venue, Long> {
-
+    Iterable<Venue> findByNameContainingIgnoreCase(String name);
 }

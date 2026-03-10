@@ -21,13 +21,13 @@ public class VenueServiceImpl implements VenueService {
 	private final static Logger log = LoggerFactory.getLogger(VenueServiceImpl.class);
 
 	private final static String DATA = "data/venues.json";
-	
+
 	private final VenueRepository venueRepository;
-	
-    @Autowired //service has an repository, service does not implement or extend a repository
-    public VenueServiceImpl(VenueRepository venueRepository) {
-        this.venueRepository = venueRepository;
-    }
+
+	@Autowired // service has an repository, service does not implement or extend a repository
+	public VenueServiceImpl(VenueRepository venueRepository) {
+		this.venueRepository = venueRepository;
+	}
 
 	@Override
 	public long count() {
@@ -38,10 +38,15 @@ public class VenueServiceImpl implements VenueService {
 	public Iterable<Venue> findAll() {
 		return venueRepository.findAll();
 	}
-	
+
 	@Override
 	public Venue save(Venue venue) {
-	    return venueRepository.save(venue);
+		return venueRepository.save(venue);
+	}
+
+	@Override
+	public Iterable<Venue> search(String name) {
+		return venueRepository.findByNameContainingIgnoreCase(name);
 	}
 
 }
