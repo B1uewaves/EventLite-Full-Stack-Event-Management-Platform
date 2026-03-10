@@ -26,8 +26,6 @@ public class EventServiceImpl implements EventService {
 
 	private final static Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
 
-	private final static String DATA = "data/events.json";
-
 	@Autowired
 	private EventRepository eventRepository;
 
