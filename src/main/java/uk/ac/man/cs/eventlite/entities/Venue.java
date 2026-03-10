@@ -12,10 +12,10 @@ public class Venue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
 	private Long id;
-
 	private String name;
-
 	private int capacity;
+	private String address;
+	private String description;
 	
 	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
 	private Set<Event> events;
@@ -46,6 +46,22 @@ public class Venue {
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 		
+	}
+	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 	
 	public Set<Event> getEvents() {

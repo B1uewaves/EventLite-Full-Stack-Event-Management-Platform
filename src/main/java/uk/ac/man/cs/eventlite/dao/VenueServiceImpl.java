@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
 
 @Service
@@ -22,7 +24,7 @@ public class VenueServiceImpl implements VenueService {
 
 	private final static String DATA = "data/venues.json";
 
-	private final VenueRepository venueRepository;
+	private VenueRepository venueRepository;
 
 	@Autowired // service has an repository, service does not implement or extend a repository
 	public VenueServiceImpl(VenueRepository venueRepository) {
@@ -48,5 +50,10 @@ public class VenueServiceImpl implements VenueService {
 	public Iterable<Venue> search(String name) {
 		return venueRepository.findByNameContainingIgnoreCase(name);
 	}
+
+	@Override
+	public Optional<Venue> findById(long id) {
+		return venueRepository.findById(id);
+	}	
 
 }
