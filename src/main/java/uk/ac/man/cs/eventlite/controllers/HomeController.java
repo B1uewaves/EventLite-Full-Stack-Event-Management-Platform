@@ -1,6 +1,5 @@
 package uk.ac.man.cs.eventlite.controllers;
 
-import uk.ac.man.cs.eventlite.dao.EventService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -9,12 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "redirect:/home";
+        return "redirect:/events";
     }
-
-    @GetMapping("/home")
-    public String homePage() {
-        return "home/index";
-    }
-
 }
