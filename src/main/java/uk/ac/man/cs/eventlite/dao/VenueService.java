@@ -15,4 +15,7 @@ public interface VenueService {
 	public Iterable<Venue> search(String name);
 	
 	public Optional<Venue> findById(long id);
+
+	public Iterable<Venue> popularVenues();
+
 }

@@ -56,4 +56,10 @@ public class VenueServiceImpl implements VenueService {
 		return venueRepository.findById(id);
 	}	
 
+	@Override
+	public Iterable<Venue> popularVenues(){
+		return venueRepository.findAllByOrderByCapacityDesc();
+	}
+
+
 }

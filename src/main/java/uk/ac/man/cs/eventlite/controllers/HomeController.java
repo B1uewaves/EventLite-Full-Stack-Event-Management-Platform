@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 import uk.ac.man.cs.eventlite.entities.Event;
+import uk.ac.man.cs.eventlite.entities.Venue;
 
 import uk.ac.man.cs.eventlite.dao.EventService;
+import uk.ac.man.cs.eventlite.dao.VenueService;
 import org.springframework.ui.Model;
 
 
@@ -23,6 +25,8 @@ public class HomeController {
     @Autowired 
     private EventService EventService;
 
+    @Autowired VenueService VenueService;
+
 
 
     
@@ -30,18 +34,30 @@ public class HomeController {
     public String home(Model model){
         LocalDate today = LocalDate.now();
         List<Event> upcomingThree = new ArrayList<>();
-        Iterable<Event> upcomingEvents = EventService.findUpcomingEvents(today);
+        List<Venue> popularThree = new ArrayList<>();
 
+        Iterable<Venue> popularVenues = VenueService.popularVenues();
+        Iterable<Event> upcomingEvents = EventService.findUpcomingEvents(today);
         // iterator used so i can use .next()
         Iterator<Event> upcomingEventsIterator = upcomingEvents.iterator();
+        Iterator<Venue> popularVenuesIterator = popularVenues.iterator();
 
-        int count = 0;
-        while (upcomingEventsIterator.hasNext() && count < 3) {
+        int Ecount = 0;
+        while (upcomingEventsIterator.hasNext() && Ecount < 3) {
             upcomingThree.add(upcomingEventsIterator.next());
-            count++;
+            Ecount++;
         }
 
+        int Vcount = 0;
+        while (popularVenuesIterator.hasNext() && Vcount < 3) {
+            popularThree.add(popularVenuesIterator.next());
+            Vcount++;
+        }        
+
         model.addAttribute("upcomingThree", upcomingThree);
+        model.addAttribute("popularThree", popularThree);
+
+
         return "home/index";
 
     }

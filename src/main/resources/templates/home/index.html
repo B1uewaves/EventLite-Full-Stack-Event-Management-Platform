@@ -13,11 +13,7 @@
 
         <h2>Upcoming Events</h2>
 
-        <div th:if="${#lists.isEmpty(upcomingThree)}" class="alert alert-info">
-            <p class="mb-0">There are currently no upcoming events.</p>
-        </div>
-
-        <table th:if="${not #lists.isEmpty(upcomingThree)}" class="table table-striped table-hover events-table">
+        <table class="table table-striped table-hover events-table">
             <colgroup>
                 <col style="width: 26%">
                 <col style="width: 20%">
@@ -38,8 +34,36 @@
               <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
               <td th:text="${{e.date}}">Event date</td>
               <td th:text="${{e.time}}">Event time</td>
-              </tr>
+            </tr>
+            
+            <tr th:if="${#lists.isEmpty(upcomingThree)}">
+                <td colspan="4" class="text-center text-muted py-3">
+                    There are currently no upcoming events.
+                </td>
+            </tr>
           </tbody>
+      </table>
+
+
+      <h2>Popular Venues</h2> <table class="table table-striped table-hover venues-table">
+        <thead>
+          <tr>
+            <th><i class="fa-solid fa-map-marker-alt"></i> Venue Name</th>
+            <th><i class="fa-solid fa-location-dot"></i> Capacity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="v : ${popularThree}">
+            <td th:text="${v.name}">Venue Name</td>
+            <td th:text="${v.capacity}">Capacity</td>
+          </tr>
+
+          <tr th:if="${#lists.isEmpty(popularThree)}">
+              <td colspan="2" class="text-center text-muted py-3">
+                  No venues were found.
+              </td>
+          </tr>
+        </tbody>
       </table>
 
     </div>
