@@ -90,4 +90,13 @@ public class VenuesControllerTest {
         verify(venueService).findAll();
         verifyNoMoreInteractions(venueService);
     }
+    
+    @Test
+    public void getAddVenueForm() throws Exception {
+        mvc.perform(get("/venues/add").accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("showAddVenueForm"))
+            .andExpect(model().attributeExists("venue"));
+    }
 }
