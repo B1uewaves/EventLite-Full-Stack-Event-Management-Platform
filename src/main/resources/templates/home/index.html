@@ -5,6 +5,7 @@
       layout:decorate="~{layouts/default}">
 <head>
     <title>All events</title>
+    
 </head>
 <body>
 
@@ -28,6 +29,7 @@
                 <th><i class="fa-solid fa-clock"></i> Time</th>
               </tr>
             </thead>
+            
           <tbody>
             <tr th:each="e : ${upcomingThree}" class="position-relative">
               <td th:text="${e.name}">My Event</td>
@@ -35,6 +37,7 @@
               <td th:text="${{e.date}}">Event date</td>
               <td th:text="${{e.time}}">Event time</td>
             </tr>
+
             
             <tr th:if="${#lists.isEmpty(upcomingThree)}">
                 <td colspan="4" class="text-center text-muted py-3">
