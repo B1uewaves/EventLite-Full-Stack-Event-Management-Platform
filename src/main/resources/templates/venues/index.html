@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
@@ -41,7 +41,7 @@
             <td th:text="${v.name}">Venue Name</td>
             <td th:text="${v.capacity}">Capacity</td>
           </tr>
-          <tr th:if="${#lists.isEmpty(venues)}">
+          <tr th:if="${venues == null or #lists.isEmpty(venues)}">
             <td colspan="2" class="text-center text-muted">
               <span th:if="${searchTerm != null}"
                 >No venues found matching "<span th:text="${searchTerm}"></span

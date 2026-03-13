@@ -8,8 +8,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.validation.Valid;
 import uk.ac.man.cs.eventlite.dao.VenueService;
@@ -19,31 +19,36 @@ import uk.ac.man.cs.eventlite.entities.Venue;
 @RequestMapping(value = "/venues", produces = { MediaType.TEXT_HTML_VALUE })
 public class VenuesController {
 
-	@Autowired
-	private VenueService venueService;
+    @Autowired
+    private VenueService venueService;
 
-	@GetMapping
-	public String getAllVenues(Model model) {
-		model.addAttribute("venues", venueService.findAll());
-		return "venues/index";
-	}
+    @GetMapping
+    public String getAllVenues(@RequestParam(value = "search", required = false) String search, Model model) {
+        if (search != null && !search.trim().isEmpty()) {
+            model.addAttribute("venues", venueService.search(search.trim()));
+            model.addAttribute("searchTerm", search.trim());
+        } else {
+            model.addAttribute("venues", venueService.findAll());
+        }
+        return "venues/index";
+    }
 
-	@GetMapping("/add")
-	public String showAddVenueForm(Model model) {
-		model.addAttribute("venue", new Venue());
-		return "venues/add";
-	}
+    @GetMapping("/add")
+    public String showAddVenueForm(Model model) {
+        model.addAttribute("venue", new Venue());
+        return "venues/add";
+    }
 
-	@PostMapping("/add")
-	public String addVenue(@Valid @ModelAttribute("venue") Venue venue,
-			BindingResult result,
-			Model model) {
+    @PostMapping("/add")
+    public String addVenue(@Valid @ModelAttribute("venue") Venue venue,
+            BindingResult result,
+            Model model) {
 
-		if (result.hasErrors()) {
-			return "venues/add";
-		}
+        if (result.hasErrors()) {
+            return "venues/add";
+        }
 
-		venueService.save(venue);
-		return "redirect:/venues";
-	}
+        venueService.save(venue);
+        return "redirect:/venues";
+    }
 }
