@@ -3,6 +3,11 @@ package uk.ac.man.cs.eventlite.entities;
 import jakarta.persistence.*; 
 import java.util.Set;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
+
 
 @Entity
 @Table(name = "venues")
@@ -12,9 +17,25 @@ public class Venue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 
 	private Long id;
-	private String name;
-	private int capacity;
-	private String address;
+    
+    @NotBlank
+    @Size(max = 255)
+    private String name;
+    
+    @Positive
+    private int capacity;
+    
+    @NotBlank
+    @Pattern(
+        regexp = ".*\\b[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}\\b.*",
+        message = "Address must contain a valid postcode"
+    )
+    private String postcode;
+    
+    @NotBlank
+    @Size(max = 299)   //< 300 chars
+    private String address;
+ 
 	private String description;
 	
 	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
@@ -54,6 +75,14 @@ public class Venue {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+	
+	public String getPostcode() {
+		return postcode;
+	}
+
+	public void setPostcode(String postcode) {
+		this.postcode = postcode;
 	}
 	
 	public String getDescription() {

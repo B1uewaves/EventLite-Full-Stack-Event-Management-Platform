@@ -4,10 +4,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import org.springframework.security.test.context.support.WithMockUser;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Collections;
 
@@ -98,5 +102,129 @@ public class VenuesControllerTest {
             .andExpect(view().name("venues/add"))
             .andExpect(handler().methodName("showAddVenueForm"))
             .andExpect(model().attributeExists("venue"));
+    }
+    
+    // Add venue tests
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postValidVenue() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", "36 Bridge St")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:/venues"))
+            .andExpect(handler().methodName("addVenue"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithoutName() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "")
+            .param("address", "36 Bridge St")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "name"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithoutAddress() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", "")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "address"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithoutPostcode() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", "36 Bridge St")
+            .param("postcode", "")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "postcode"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithNegativeCapacity() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", "36 Bridge St")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "-5")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "capacity"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithZeroCapacity() throws Exception {
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", "36 Bridge St")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "0")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "capacity"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithLongName() throws Exception {
+        String longName = "a".repeat(256);
+
+        mvc.perform(post("/venues/add")
+            .param("name", longName)
+            .param("address", "36 Bridge St")
+            .param("postcode", "M3 3BT")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "name"));
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    public void postVenueWithLongAddress() throws Exception {
+        String longAddress = "a".repeat(300);
+
+        mvc.perform(post("/venues/add")
+            .param("name", "Manchester Hall")
+            .param("address", longAddress)
+            .param("postcode", "M1 1AA")
+            .param("capacity", "200")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(handler().methodName("addVenue"))
+            .andExpect(model().attributeHasFieldErrors("venue", "address"));
     }
 }

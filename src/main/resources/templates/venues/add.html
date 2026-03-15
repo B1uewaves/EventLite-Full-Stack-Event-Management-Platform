@@ -36,6 +36,14 @@
              th:errors="*{address}">
         </div>
       </div>
+	  
+	  <div class="mb-3">
+	    <label class="form-label">Postcode</label>
+	    <input type="text" th:field="*{postcode}" class="form-control" required>
+	    <div class="text-danger"
+			 th:if="${#fields.hasErrors('postcode')}"
+			 th:errors="*{postcode}"></div>
+	  </div>
 
       <div class="mb-3">
         <label class="form-label">Description</label>
