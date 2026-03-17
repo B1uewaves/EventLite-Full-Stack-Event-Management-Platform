@@ -38,7 +38,9 @@
         </thead>
         <tbody>
           <tr th:each="v : ${venues}">
-            <td th:text="${v.name}">Venue Name</td>
+			<td>
+			  <a th:href="@{'/venues/' + ${v.id}}" th:text="${v.name}">Venue Name</a>
+			</td>
             <td th:text="${v.capacity}">Capacity</td>
           </tr>
           <tr th:if="${venues == null or #lists.isEmpty(venues)}">

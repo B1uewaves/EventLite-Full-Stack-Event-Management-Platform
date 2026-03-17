@@ -1,5 +1,6 @@
 package uk.ac.man.cs.eventlite.controllers;
 
+import java.util.Optional;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -226,5 +227,24 @@ public class VenuesControllerTest {
             .andExpect(view().name("venues/add"))
             .andExpect(handler().methodName("addVenue"))
             .andExpect(model().attributeHasFieldErrors("venue", "address"));
+    }
+    
+    @Test
+    public void getVenueById() throws Exception {
+        when(venueService.findById(1L)).thenReturn(Optional.of(venue));
+        when(venue.getId()).thenReturn(1L);
+        when(venue.getName()).thenReturn("Withworth Hall");
+        when(venue.getAddress()).thenReturn("Oxford Road, Manchester");
+        when(venue.getPostcode()).thenReturn("M13 9PL");
+        when(venue.getCapacity()).thenReturn(500);
+
+        mvc.perform(get("/venues/1").accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/show"))
+            .andExpect(handler().methodName("getVenue"))
+            .andExpect(model().attributeExists("venue"));
+
+        verify(venueService).findById(1L);
+        verifyNoMoreInteractions(venueService);
     }
 }

@@ -1,12 +1,14 @@
 package uk.ac.man.cs.eventlite.entities;
 
-import jakarta.persistence.*; 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.constraints.Pattern;
 
 
 @Entity
@@ -38,6 +40,7 @@ public class Venue {
  
 	private String description;
 	
+	@JsonIgnore
 	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
 	private Set<Event> events;
 
