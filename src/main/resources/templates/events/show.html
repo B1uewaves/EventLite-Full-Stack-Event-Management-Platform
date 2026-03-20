@@ -29,9 +29,30 @@
         <span th:text="${event.description}">Event Description</span>
       </p>
     </div>
-    <div class="card-footer">
-      <a class="btn btn-secondary" th:href="@{/events}">Back to all events</a>
-    </div>
+	<div class="card-footer">
+
+	  <a class="btn btn-secondary" th:href="@{/events}">
+	    Back to all events
+	  </a>
+
+	  <a sec:authorize="isAuthenticated()"
+	     th:if="${#authentication.name == event.ownerUsername}"
+	     th:href="@{/events/edit/{id}(id=${event.id}, redirect='/events/' + ${event.id})}"
+	     class="btn btn-outline-primary">
+	     <i class="fa-solid fa-pen-to-square"></i> Edit
+	  </a>
+	  
+	  <form sec:authorize="isAuthenticated()"
+	        th:if="${#authentication.name == event.ownerUsername}"
+	        th:action="@{/my/events/{id}(id=${event.id})}"
+	        th:method="delete"
+	        style="display:inline">
+	    <button type="submit" class="btn btn-danger">
+	      Delete
+	    </button>
+	  </form>
+
+	</div>
   </div>
 </div>
 </body>
