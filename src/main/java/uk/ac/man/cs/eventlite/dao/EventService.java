@@ -1,8 +1,6 @@
 package uk.ac.man.cs.eventlite.dao;
-import java.time.LocalDate;
 import java.util.Optional;
 import uk.ac.man.cs.eventlite.entities.Event;
-import java.time.LocalDate;
 
 import java.util.Optional;
 
@@ -22,9 +20,6 @@ public interface EventService {
 	public Event saveForUser(Event event, String ownerUsername);
 
 	public Iterable<Event> search(String name);
-
-    public Iterable<Event> findPastEvents(LocalDate currentDate);
-    public Iterable<Event> findUpcomingEvents(LocalDate currentDate);
 	
 	public void deleteById(long id);
 	

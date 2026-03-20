@@ -36,10 +36,9 @@ public class InitialDataLoader {
 				log.info("Database already populated with events. Skipping event initialization.");
 			} else {
                 Event e1 = new Event();
-                e1.setName("InitialDataLoader creation 01");
+                e1.setName("COMP23412 Showcase 01");
                 e1.setDate(LocalDate.of(2026, 5, 12));
                 e1.setTime(LocalTime.of(9, 0));
-                e1.setOwnerUsername("Alice");
 				Venue v1 = new Venue();
 				v1.setName("Withworth Hall");
 				v1.setCapacity(500);
@@ -47,20 +46,18 @@ public class InitialDataLoader {
 
 
                 Event e2 = new Event();
-                e2.setName("InitialDataLoader creation 02");
+                e2.setName("COMP23412 Showcase 02");
                 e2.setDate(LocalDate.of(2026, 5, 12));
                 e2.setTime(LocalTime.of(12, 0));
-                e2.setOwnerUsername("Tom");
 				Venue v2 = new Venue();
 				v2.setName("Alan Turing");
 				v2.setCapacity(1000);
 				e2.setVenue(v2);
 
                 Event e3 = new Event();
-                e3.setName("InitialDataLoader creation 03");
+                e3.setName("COMP23412 Showcase 03");
                 e3.setDate(LocalDate.of(2026, 5, 13));
                 e3.setTime(LocalTime.of(10, 0));
-                e3.setOwnerUsername("Caroline");
 				Venue v3 = new Venue();
 				v3.setName("Crawford House");
 				v3.setCapacity(5000);
