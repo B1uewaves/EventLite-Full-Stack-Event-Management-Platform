@@ -28,7 +28,7 @@ public class VenuesController {
             model.addAttribute("venues", venueService.search(search.trim()));
             model.addAttribute("searchTerm", search.trim());
         } else {
-            model.addAttribute("venues", venueService.popularVenues());
+            model.addAttribute("venues", venueService.findAll());
         }
         return "venues/index";
     }
