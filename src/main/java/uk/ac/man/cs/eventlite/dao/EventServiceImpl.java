@@ -1,11 +1,13 @@
 package uk.ac.man.cs.eventlite.dao;
 
 import java.io.InputStream;
-
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.time.LocalDate;
+
 
 
 import org.slf4j.Logger;
@@ -23,8 +25,6 @@ import uk.ac.man.cs.eventlite.entities.Event;
 public class EventServiceImpl implements EventService {
 
 	private final static Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
-
-	private final static String DATA = "data/events.json";
 
 	@Autowired
 	private EventRepository eventRepository;
@@ -70,4 +70,15 @@ public class EventServiceImpl implements EventService {
 	public void deleteById(long id) {
 		eventRepository.deleteById(id);
 	}
+
+	@Override
+	public Iterable<Event> findPastEvents(LocalDate currentDate) {
+		return eventRepository.findByDateBeforeOrderByDateDescTimeDesc(currentDate);
+	}
+
+	@Override
+	public Iterable<Event> findUpcomingEvents(LocalDate currentDate) {
+		return eventRepository.findByDateGreaterThanEqualOrderByDateAscTimeAsc(currentDate);
+	}
 }
+
