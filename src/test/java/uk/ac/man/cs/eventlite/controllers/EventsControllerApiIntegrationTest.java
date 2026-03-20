@@ -13,11 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import uk.ac.man.cs.eventlite.EventLite;
+import uk.ac.man.cs.eventlite.dao.EventService;
+import uk.ac.man.cs.eventlite.dao.VenueService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EventLite.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,6 +32,8 @@ public class EventsControllerApiIntegrationTest extends AbstractTransactionalJUn
 	private int port;
 
 	private WebTestClient client;
+
+	
 
 	@BeforeEach
 	public void setup() {
@@ -42,7 +47,7 @@ public class EventsControllerApiIntegrationTest extends AbstractTransactionalJUn
 				.value(endsWith("/api/events")).jsonPath("$._embedded.events.length()").value(equalTo(3));
 	}
 
-	@Test
+	@Test	
 	public void getEventNotFound() {
 		client.get().uri("/events/99").accept(MediaType.APPLICATION_JSON).exchange().expectStatus().isNotFound()
 				.expectHeader().contentType(MediaType.APPLICATION_JSON).expectBody().jsonPath("$.error")

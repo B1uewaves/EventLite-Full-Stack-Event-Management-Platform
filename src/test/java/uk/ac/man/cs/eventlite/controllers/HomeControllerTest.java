@@ -71,7 +71,6 @@ class HomeControllerTest {
   }
 
 
-
   @Test
   void getHomeLimitsBothListsToThree() throws Exception {
     List<Event> events = Arrays.asList(

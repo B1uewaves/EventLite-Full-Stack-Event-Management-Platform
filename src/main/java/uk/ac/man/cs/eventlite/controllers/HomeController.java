@@ -16,6 +16,7 @@ import uk.ac.man.cs.eventlite.entities.Venue;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import org.springframework.ui.Model;
+import org.springframework.http.MediaType;
 
 
 
@@ -30,7 +31,7 @@ public class HomeController {
 
 
     
-    @GetMapping("/")
+    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
     public String home(Model model){
         LocalDate today = LocalDate.now();
         List<Event> upcomingThree = new ArrayList<>();

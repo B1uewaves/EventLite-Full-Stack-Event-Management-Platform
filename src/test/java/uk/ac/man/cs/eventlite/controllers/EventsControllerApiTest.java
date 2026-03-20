@@ -59,10 +59,11 @@ public class EventsControllerApiTest {
 		e.setName("Event");
 		e.setDate(LocalDate.now());
 		e.setTime(LocalTime.now());
-		// e.setVenue(0);
 		Venue v = new Venue();
+		e.setVenue(v);
 		v.setId(0);
 		e.setVenue(v);
+		
 		when(eventService.findAll()).thenReturn(Collections.<Event>singletonList(e));
 		when(eventService.findAll()).thenReturn(Collections.<Event>singletonList(e));
 
