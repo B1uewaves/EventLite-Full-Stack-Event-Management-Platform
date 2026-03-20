@@ -26,4 +26,6 @@ public interface EventService {
     public Iterable<Event> findPastEvents(LocalDate currentDate);
     public Iterable<Event> findUpcomingEvents(LocalDate currentDate);
 	
+	public void deleteById(long id);
+	
 }

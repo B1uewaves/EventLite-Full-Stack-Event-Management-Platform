@@ -65,7 +65,11 @@ public class EventServiceImpl implements EventService {
 	public Iterable<Event> search(String name) {
 		return eventRepository.findByNameContainingIgnoreCase(name);
 	}
-
+	
+	@Override
+	public void deleteById(long id) {
+		eventRepository.deleteById(id);
+	}
 
 	@Override
 	public Iterable<Event> findPastEvents(LocalDate currentDate) {
@@ -77,3 +81,4 @@ public class EventServiceImpl implements EventService {
 		return eventRepository.findByDateGreaterThanEqualOrderByDateAscTimeAsc(currentDate);
 	}
 }
+
