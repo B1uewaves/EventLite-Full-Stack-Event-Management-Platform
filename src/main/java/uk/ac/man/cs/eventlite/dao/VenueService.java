@@ -17,5 +17,6 @@ public interface VenueService {
 	public Optional<Venue> findById(long id);
 
 	public Iterable<Venue> popularVenues();
-
+	
+	boolean existsByName(String name);
 }
