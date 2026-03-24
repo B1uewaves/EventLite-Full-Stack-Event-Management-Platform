@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.MediaType;
 
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
@@ -26,10 +27,7 @@ public class HomeController {
     @Autowired
     VenueService VenueService;
 
-
-
-    
-    @GetMapping("/")
+    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
     public String home(Model model){
         LocalDate today = LocalDate.now();
         List<Event> upcomingThree = new ArrayList<>();
