@@ -3,10 +3,13 @@ package uk.ac.man.cs.eventlite.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.StreamSupport;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,7 @@ import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 
 @RestController
-@RequestMapping(value = "/api/events", produces = { MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
+@RequestMapping(value = "/api/events", produces = MediaType.APPLICATION_JSON_VALUE)
 public class EventsControllerApi {
 
 	private static final String NOT_FOUND_MSG = "{ \"error\": \"%s\", \"id\": %d }";
@@ -34,19 +37,40 @@ public class EventsControllerApi {
 	private EventModelAssembler eventAssembler;
 
 	@ExceptionHandler(EventNotFoundException.class)
-	public ResponseEntity<?> eventNotFoundHandler(EventNotFoundException ex) {
+	public ResponseEntity<String> eventNotFoundHandler(EventNotFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
+				.contentType(MediaType.APPLICATION_JSON)
 				.body(String.format(NOT_FOUND_MSG, ex.getMessage(), ex.getId()));
 	}
 
 	@GetMapping("/{id}")
 	public EntityModel<Event> getEvent(@PathVariable("id") long id) {
-		throw new EventNotFoundException(id);
+		Event event = eventService.findById(id)
+				.orElseThrow(() -> new EventNotFoundException(id));
+
+		return eventAssembler.toModel(event);
 	}
 
 	@GetMapping
-	public CollectionModel<EntityModel<Event>> getAllEvents() {
-		return eventAssembler.toCollectionModel(eventService.findAll())
-				.add(linkTo(methodOn(EventsControllerApi.class).getAllEvents()).withSelfRel());
+	public Map<String, Object> getAllEvents() {
+		List<EntityModel<Event>> events = StreamSupport
+				.stream(eventService.findAll().spliterator(), false)
+				.map(eventAssembler::toModel)
+				.toList();
+
+		Map<String, Object> embedded = new HashMap<>();
+		embedded.put("events", events);
+
+		Map<String, Object> self = new HashMap<>();
+		self.put("href", linkTo(methodOn(EventsControllerApi.class).getAllEvents()).toUri().toString());
+
+		Map<String, Object> links = new HashMap<>();
+		links.put("self", self);
+
+		Map<String, Object> response = new HashMap<>();
+		response.put("_embedded", embedded);
+		response.put("_links", links);
+
+		return response;
 	}
 }

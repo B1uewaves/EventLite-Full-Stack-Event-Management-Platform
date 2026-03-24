@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layouts/default}">
 <head>
   <title>Event Details</title>
@@ -22,7 +23,12 @@
       </p>
       <p>
         <strong>Venue:</strong>
-        <span th:text="${event.venue != null ? event.venue.name : 'Venue TBC'}">Venue Name</span>
+		<span th:if="${event.venue == null}">Venue TBC</span>
+		<a th:if="${event.venue != null}"
+		   th:href="@{/venues/{id}(id=${event.venue.id})}"
+		   th:text="${event.venue.name}">
+		   Venue Name
+		</a>
       </p>
       <p>
         <strong>Description:</strong>

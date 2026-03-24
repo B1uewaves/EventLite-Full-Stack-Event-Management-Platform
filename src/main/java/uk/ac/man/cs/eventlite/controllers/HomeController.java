@@ -9,29 +9,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
-
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import org.springframework.ui.Model;
-import org.springframework.http.MediaType;
 
 
 
 @Controller
 public class HomeController {
 
-    @Autowired 
+    @Autowired
     private EventService EventService;
 
-    @Autowired VenueService VenueService;
+    @Autowired
+    VenueService VenueService;
 
 
 
     
-    @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
+    @GetMapping("/")
     public String home(Model model){
         LocalDate today = LocalDate.now();
         List<Event> upcomingThree = new ArrayList<>();
@@ -39,7 +37,7 @@ public class HomeController {
 
         Iterable<Venue> popularVenues = VenueService.popularVenues();
         Iterable<Event> upcomingEvents = EventService.findUpcomingEvents(today);
-        // iterator used so i can use .next()
+
         Iterator<Event> upcomingEventsIterator = upcomingEvents.iterator();
         Iterator<Venue> popularVenuesIterator = popularVenues.iterator();
 
@@ -53,14 +51,11 @@ public class HomeController {
         while (popularVenuesIterator.hasNext() && Vcount < 3) {
             popularThree.add(popularVenuesIterator.next());
             Vcount++;
-        }        
+        }
 
         model.addAttribute("upcomingThree", upcomingThree);
         model.addAttribute("popularThree", popularThree);
 
-
         return "home/index";
-
     }
-
 }

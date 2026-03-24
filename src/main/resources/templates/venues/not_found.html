@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layouts/default}">
+<head>
+    <title>Venue Not Found</title>
+</head>
+<body>
+  <div layout:fragment="content">
+    <div class="alert alert-warning mt-4">
+        <h2>Venue Not Found</h2>
+        <p>Sorry, the venue with ID <strong th:text="${not_found_id}">0</strong> could not be found.</p>
+        <hr>
+        <a th:href="@{/venues}" class="btn btn-primary">Back to Venue List</a>
+    </div>
+  </div>
+</body>
+</html>

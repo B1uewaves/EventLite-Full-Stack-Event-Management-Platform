@@ -38,9 +38,21 @@
         </thead>
         <tbody>
           <tr th:each="v : ${venues}">
-            <td th:text="${v.name}">Venue Name</td>
+			<td>
+			  <a th:href="@{'/venues/' + ${v.id}}" th:text="${v.name}">Venue Name</a>
+			</td>
             <td th:text="${v.capacity}">Capacity</td>
+
+            <td sec:authorize="hasRole('ADMINISTRATOR')">
+              <div class="btn-group" role="group">
+                <a th:href="@{/venues/edit/{id}(id=${v.id})}"
+                   class="btn btn-sm btn-outline-primary">
+                   <i class="fa-solid fa-pen-to-square"></i> Edit
+                </a>
+              </div>
+            </td>
           </tr>
+          
           <tr th:if="${venues == null or #lists.isEmpty(venues)}">
             <td colspan="2" class="text-center text-muted">
               <span th:if="${searchTerm != null}"

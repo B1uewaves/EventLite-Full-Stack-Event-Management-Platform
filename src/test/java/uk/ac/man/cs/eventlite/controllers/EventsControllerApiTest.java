@@ -46,7 +46,7 @@ public class EventsControllerApiTest {
 		when(eventService.findAll()).thenReturn(Collections.<Event>emptyList());
 
 		mvc.perform(get("/api/events").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(handler().methodName("getAllEvents")).andExpect(jsonPath("$.length()", equalTo(1)))
+				.andExpect(handler().methodName("getAllEvents")).andExpect(jsonPath("$.length()", equalTo(2)))
 				.andExpect(jsonPath("$._links.self.href", endsWith("/api/events")));
 
 		verify(eventService).findAll();
