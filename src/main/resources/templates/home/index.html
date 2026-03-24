@@ -38,7 +38,7 @@
             <tr th:each="e : ${upcomingThree}" class="position-relative">
               <td>
                 <a class="stretched-link text-decoration-none"
-                  th:href="@{/events/{id}(id=${e.id})}"
+                  th:href="@{/events/{id}(id=${e.id}, returnTo='/')}"
                   th:text="${e.name}">My Event </a> 
                   <!--  detailed page (do we need one for venue?) -->
               </td>

@@ -37,8 +37,9 @@
     </div>
 	<div class="card-footer">
 
-	  <a class="btn btn-secondary" th:href="@{/events}">
-	    Back to all events
+	  <a th:href="${returnTo}" class="btn btn-secondary">
+      <!-- if the reurnTo is specified then it goes to the URL if not it goes to /events - JJ -->
+	    Back
 	  </a>
 
 	  <a sec:authorize="isAuthenticated()"

@@ -45,12 +45,17 @@ public class EventsController {
 	}
 
 	@GetMapping("/{id}")
-	public String getEvent(@PathVariable("id") long id, Model model) {
+	public String getEvent(@PathVariable("id") long id, @RequestParam(value = "returnTo", required = false) String returnTo, Model model) { 
+		
+		Event event = eventService.findById(id).orElseThrow(()-> new EventNotFoundException(id));
+		model.addAttribute("event", event);
+		if(returnTo == null){returnTo = "/events";}
+		model.addAttribute("returnTo", returnTo);
+		
+		// added a returnTo String so that it will go back to the prev page -- JJ
+		// replaced .map() with .orElseThrow() as adding the returnTo attribute was causing a type inference error -- JJ
+		return "events/show";
 
-		return eventService.findById(id).map(event -> {
-			model.addAttribute("event", event);
-			return "events/show";
-		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
 
 	@GetMapping
