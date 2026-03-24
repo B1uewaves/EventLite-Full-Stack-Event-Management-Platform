@@ -28,9 +28,6 @@ public class HomeController {
 
     @Autowired VenueService VenueService;
 
-
-
-    
     @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
     public String home(Model model){
         LocalDate today = LocalDate.now();
