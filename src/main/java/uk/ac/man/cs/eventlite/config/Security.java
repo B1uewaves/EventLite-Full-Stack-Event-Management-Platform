@@ -22,7 +22,6 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 public class Security {
 
 	public static final String ADMIN_ROLE = "ADMINISTRATOR";
-	public static final String USER_ROLE = "USER";
 
 	// List the mappings/methods for which no authorisation is required.
 	// By default we allow all GETs and full access to the H2 console.
@@ -94,11 +93,11 @@ public class Security {
 
 		UserDetails rob = User.withUsername("Rob").password(encoder.encode("Haines")).roles(ADMIN_ROLE).build();
 		UserDetails caroline = User.withUsername("Caroline").password(encoder.encode("Jay")).roles(ADMIN_ROLE).build();
-		UserDetails duncan = User.withUsername("Duncan").password(encoder.encode("Hull")).roles(USER_ROLE).build();
-		UserDetails markel = User.withUsername("Markel").password(encoder.encode("Vigo")).roles(USER_ROLE).build();
-		UserDetails mustafa = User.withUsername("Mustafa").password(encoder.encode("Mustafa")).roles(USER_ROLE).build();
-		UserDetails tom = User.withUsername("Tom").password(encoder.encode("Carroll")).roles(USER_ROLE).build();
-		UserDetails alice = User.withUsername("Alice").password(encoder.encode("Password")).roles(USER_ROLE).build();
+		UserDetails duncan = User.withUsername("Duncan").password(encoder.encode("Hull")).roles(ADMIN_ROLE).build();
+		UserDetails markel = User.withUsername("Markel").password(encoder.encode("Vigo")).roles(ADMIN_ROLE).build();
+		UserDetails mustafa = User.withUsername("Mustafa").password(encoder.encode("Mustafa")).roles(ADMIN_ROLE).build();
+		UserDetails tom = User.withUsername("Tom").password(encoder.encode("Carroll")).roles(ADMIN_ROLE).build();
+		UserDetails alice = User.withUsername("Alice").password(encoder.encode("Password")).roles(ADMIN_ROLE).build();
 		return new InMemoryUserDetailsManager(rob, caroline, duncan, markel, mustafa, tom, alice);
 	}
 }
