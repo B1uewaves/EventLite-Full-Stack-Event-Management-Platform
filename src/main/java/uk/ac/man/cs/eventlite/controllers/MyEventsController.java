@@ -36,7 +36,7 @@ public class MyEventsController {
 	@GetMapping
 	public String index(Model model, Principal principal) {
 		String username = principal.getName();
-		model.addAttribute("events", eventService.findAllForUser(username));
+		model.addAttribute("events", eventService.findAll());
 		return "my/events/index";
 	}
 
