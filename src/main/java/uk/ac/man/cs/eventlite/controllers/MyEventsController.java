@@ -72,17 +72,8 @@ public class MyEventsController {
 	    Optional<Event> eventOpt = eventService.findById(id);
 
 	    if (eventOpt.isPresent()) {
-	        Event event = eventOpt.get();
-
-	        if (event.getOwnerUsername() != null &&
-	            event.getOwnerUsername().equals(principal.getName())) {
-
-	            eventService.deleteById(id);
-	            redirectAttrs.addFlashAttribute("ok_message", "Event deleted.");
-	        } else {
-	            redirectAttrs.addFlashAttribute("error_message",
-	                    "You can only delete your own events.");
-	        }
+	        eventService.deleteById(id);
+	        redirectAttrs.addFlashAttribute("ok_message", "Event deleted.");
 	    } else {
 	        redirectAttrs.addFlashAttribute("error_message", "Event not found.");
 	    }

@@ -95,9 +95,6 @@ public class EventsController {
 			Principal principal,
 			HttpServletRequest request) {
 		return eventService.findById(id).map(event -> {
-			if (!event.getOwnerUsername().equals(principal.getName()) && !request.isUserInRole("ADMINISTRATOR")) {
-				return "redirect:/events";
-			}
 
 			model.addAttribute("event", event);
 			model.addAttribute("venues", venueService.findAll());
@@ -122,10 +119,6 @@ public class EventsController {
 		}
 
 		return eventService.findById(id).map(existingEvent -> {
-			if (!existingEvent.getOwnerUsername().equals(principal.getName())
-					&& !request.isUserInRole("ADMINISTRATOR")) {
-				return "redirect:/events";
-			}
 
 			existingEvent.setName(updatedEvent.getName());
 			existingEvent.setDate(updatedEvent.getDate());
