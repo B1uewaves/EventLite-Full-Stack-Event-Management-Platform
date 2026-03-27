@@ -44,17 +44,17 @@ public class Security {
 				.requestMatchers(mvc.matcher(HttpMethod.GET, "/webjars/**")).permitAll()
 				
 				// Organiser space (must be logged in)
-				.requestMatchers(mvc.matcher("/my/**")).authenticated()
+				.requestMatchers(mvc.matcher("/my/**")).hasRole(ADMIN_ROLE)
 				
 				// Admin space
 				.requestMatchers(mvc.matcher("/admin/**")).hasRole(ADMIN_ROLE)
 				
 				//update events
-				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/update/*")).authenticated()
+				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/update/*")).hasRole(ADMIN_ROLE)
 				
 				// Public pages (all GETs)
 				// Allow event creation
-				.requestMatchers(mvc.matcher(HttpMethod.POST, "/my/events")).authenticated()
+				.requestMatchers(mvc.matcher(HttpMethod.POST, "/my/events")).hasRole(ADMIN_ROLE)
 
 				// Public pages (all GETs)
 				.requestMatchers(mvc.matcher(HttpMethod.GET, "/**")).permitAll()
