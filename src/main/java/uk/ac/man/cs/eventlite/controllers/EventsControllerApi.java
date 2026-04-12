@@ -24,6 +24,10 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 
+import org.springframework.hateoas.CollectionModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping(value = "/api/events", produces = MediaType.APPLICATION_JSON_VALUE)
 public class EventsControllerApi {
@@ -52,25 +56,13 @@ public class EventsControllerApi {
 	}
 
 	@GetMapping
-	public Map<String, Object> getAllEvents() {
+	public CollectionModel<EntityModel<Event>> getAllEvents() {
 		List<EntityModel<Event>> events = StreamSupport
 				.stream(eventService.findAll().spliterator(), false)
 				.map(eventAssembler::toModel)
 				.toList();
-
-		Map<String, Object> embedded = new HashMap<>();
-		embedded.put("events", events);
-
-		Map<String, Object> self = new HashMap<>();
-		self.put("href", linkTo(methodOn(EventsControllerApi.class).getAllEvents()).toUri().toString());
-
-		Map<String, Object> links = new HashMap<>();
-		links.put("self", self);
-
-		Map<String, Object> response = new HashMap<>();
-		response.put("_embedded", embedded);
-		response.put("_links", links);
-
-		return response;
+	
+		return CollectionModel.of(events,
+				linkTo(methodOn(EventsControllerApi.class).getAllEvents()).withSelfRel());
 	}
 }

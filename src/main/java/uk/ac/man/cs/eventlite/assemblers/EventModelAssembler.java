@@ -8,6 +8,7 @@ import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
 
 import uk.ac.man.cs.eventlite.controllers.EventsControllerApi;
+import uk.ac.man.cs.eventlite.controllers.VenuesControllerApi;
 import uk.ac.man.cs.eventlite.entities.Event;
 
 @Component
@@ -15,7 +16,14 @@ public class EventModelAssembler implements RepresentationModelAssembler<Event, 
 
 	@Override
 	public EntityModel<Event> toModel(Event event) {
-		return EntityModel.of(event, linkTo(methodOn(EventsControllerApi.class).getEvent(event.getId())).withSelfRel(),
+		EntityModel<Event> model = EntityModel.of(event,
+				linkTo(methodOn(EventsControllerApi.class).getEvent(event.getId())).withSelfRel(),
 				linkTo(methodOn(EventsControllerApi.class).getAllEvents()).withRel("events"));
+
+		if (event.getVenue() != null) {
+			model.add(linkTo(methodOn(VenuesControllerApi.class).getVenue(event.getVenue().getId())).withRel("venue"));
+		}
+
+		return model;
 	}
 }
