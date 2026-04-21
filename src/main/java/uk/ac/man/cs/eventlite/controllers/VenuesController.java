@@ -37,7 +37,7 @@ public class VenuesController {
         }
         return "venues/index";
     }
-    
+
     @GetMapping("/{id}")
     public String getVenue(@PathVariable("id") long id, Model model) {
         return venueService.findById(id).map(venue -> {
@@ -66,9 +66,9 @@ public class VenuesController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showUpdateForm(@PathVariable("id") long id, 
-                                 HttpServletRequest request, 
-                                 Model model) {
+    public String showUpdateForm(@PathVariable("id") long id,
+            HttpServletRequest request,
+            Model model) {
         if (!request.isUserInRole("ADMINISTRATOR")) {
             return "redirect:/venues";
         }
@@ -81,11 +81,11 @@ public class VenuesController {
 
     @PostMapping("/update/{id}")
     public String updateVenue(@PathVariable("id") long id,
-                              @Valid @ModelAttribute("venue") Venue updatedVenue,
-                              BindingResult result,
-                              HttpServletRequest request,
-                              Model model) {
-        
+            @Valid @ModelAttribute("venue") Venue updatedVenue,
+            BindingResult result,
+            HttpServletRequest request,
+            Model model) {
+
         if (!request.isUserInRole("ADMINISTRATOR")) {
             return "redirect:/venues";
         }
@@ -99,6 +99,9 @@ public class VenuesController {
             existingVenue.setCapacity(updatedVenue.getCapacity());
             existingVenue.setAddress(updatedVenue.getAddress());
             existingVenue.setPostcode(updatedVenue.getPostcode());
+            existingVenue.setLatitude(updatedVenue.getLatitude());
+            existingVenue.setLongitude(updatedVenue.getLongitude());
+            existingVenue.setDescription(updatedVenue.getDescription());
 
             venueService.save(existingVenue);
             return "redirect:/venues";

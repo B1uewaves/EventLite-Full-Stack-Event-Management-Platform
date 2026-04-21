@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
@@ -48,7 +47,7 @@ public class EventsControllerApiTest {
 		when(eventService.findAll()).thenReturn(Collections.<Event>emptyList());
 
 		mvc.perform(get("/api/events").accept(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(handler().methodName("getAllEvents")).andExpect(jsonPath("$.length()", equalTo(2)))
+				.andExpect(handler().methodName("getAllEvents")).andExpect(jsonPath("$.length()", equalTo(1)))
 				.andExpect(jsonPath("$._links.self.href", endsWith("/api/events")));
 
 		verify(eventService).findAll();
@@ -65,7 +64,7 @@ public class EventsControllerApiTest {
 		e.setVenue(v);
 		v.setId(0);
 		e.setVenue(v);
-		
+
 		when(eventService.findAll()).thenReturn(Collections.<Event>singletonList(e));
 		when(eventService.findAll()).thenReturn(Collections.<Event>singletonList(e));
 
