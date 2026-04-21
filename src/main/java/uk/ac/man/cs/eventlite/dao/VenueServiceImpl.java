@@ -43,6 +43,8 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public Venue save(Venue venue) {
+		String normalizedName = venue.getName().trim().replaceAll("\\s+", " ");
+	    venue.setName(normalizedName);
 		return venueRepository.save(venue);
 	}
 
@@ -59,6 +61,12 @@ public class VenueServiceImpl implements VenueService {
 	@Override
 	public Iterable<Venue> popularVenues(){
 		return venueRepository.findAllByOrderByCapacityDesc();
+	}
+	
+	@Override
+	public boolean existsByName(String name) {
+	    String normalizedName = name.trim().replaceAll("\\s+", " ");
+	    return venueRepository.existsByNameIgnoreCase(normalizedName);
 	}
 
 

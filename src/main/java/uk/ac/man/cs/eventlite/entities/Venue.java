@@ -1,5 +1,11 @@
 package uk.ac.man.cs.eventlite.entities;
 
+<<<<<<< HEAD
+=======
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.*; 
+>>>>>>> refs/remotes/origin/venueapi
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,6 +26,7 @@ public class Venue {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 
 	private Long id;
+<<<<<<< HEAD
 
 	@NotBlank
 	@Size(max = 255)
@@ -44,8 +51,34 @@ public class Venue {
 	@DecimalMax(value = "180.0", message = "Longitude must be <= 180.0")
 	private Double longitude;
 
+=======
+    
+    @Column(unique = true)
+    @NotBlank
+    @Size(max = 255)
+    private String name;
+    
+    @Positive
+    private int capacity;
+    
+    @NotBlank
+    @Pattern(
+        regexp = ".*\\b[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}\\b.*",
+        message = "Address must contain a valid postcode"
+    )
+    private String postcode;
+    
+    @NotBlank
+    @Size(max = 299)   //< 300 chars
+    private String address;
+ 
+>>>>>>> refs/remotes/origin/venueapi
 	private String description;
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> refs/remotes/origin/venueapi
 	@JsonIgnore
 	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
 	private Set<Event> events;

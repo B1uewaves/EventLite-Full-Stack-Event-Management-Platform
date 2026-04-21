@@ -56,6 +56,15 @@ public class VenuesController {
     public String addVenue(@Valid @ModelAttribute("venue") Venue venue,
             BindingResult result,
             Model model) {
+    	
+    	String normalizedName = venue.getName().trim();
+    	venue.setName(normalizedName);
+
+        // check duplicate name
+        if (venueService.existsByName(normalizedName)) {
+            result.rejectValue("name", "duplicate", "A venue with this name already exists");
+        }
+
 
         if (result.hasErrors()) {
             return "venues/add";

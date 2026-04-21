@@ -34,6 +34,7 @@
           <tr>
             <th><i class="fa-solid fa-map-marker-alt"></i> Venue Name</th>
             <th><i class="fa-solid fa-location-dot"></i> Capacity</th>
+			<th><i class="fa-solid fa-location-dot"></i> ID</th>
           </tr>
         </thead>
         <tbody>
@@ -42,15 +43,7 @@
 			  <a th:href="@{'/venues/' + ${v.id}}" th:text="${v.name}">Venue Name</a>
 			</td>
             <td th:text="${v.capacity}">Capacity</td>
-
-            <td sec:authorize="hasRole('ADMINISTRATOR')">
-              <div class="btn-group" role="group">
-                <a th:href="@{/venues/edit/{id}(id=${v.id})}"
-                   class="btn btn-sm btn-outline-primary">
-                   <i class="fa-solid fa-pen-to-square"></i> Edit
-                </a>
-              </div>
-            </td>
+			<td th:text="${v.id}">ID</td>
           </tr>
           
           <tr th:if="${venues == null or #lists.isEmpty(venues)}">

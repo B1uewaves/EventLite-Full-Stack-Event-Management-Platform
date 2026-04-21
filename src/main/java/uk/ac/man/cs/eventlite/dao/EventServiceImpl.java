@@ -80,5 +80,10 @@ public class EventServiceImpl implements EventService {
 	public Iterable<Event> findUpcomingEvents(LocalDate currentDate) {
 		return eventRepository.findByDateGreaterThanEqualOrderByDateAscTimeAsc(currentDate);
 	}
+	
+	@Override
+	public Iterable<Event> findNext3EventsByVenueId(long venueId, LocalDate currentDate) {
+	    return eventRepository.findTop3ByVenueIdAndDateGreaterThanEqualOrderByDateAscTimeAsc(venueId, currentDate);
+	}
 }
 
