@@ -1,16 +1,16 @@
 package uk.ac.man.cs.eventlite.entities;
 
-<<<<<<< HEAD
-=======
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.*; 
->>>>>>> refs/remotes/origin/venueapi
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -24,10 +24,9 @@ public class Venue {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-
 	private Long id;
-<<<<<<< HEAD
 
+	@Column(unique = true)
 	@NotBlank
 	@Size(max = 255)
 	private String name;
@@ -36,7 +35,10 @@ public class Venue {
 	private int capacity;
 
 	@NotBlank
-	@Pattern(regexp = ".*\\b[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}\\b.*", message = "Address must contain a valid postcode")
+	@Pattern(
+		regexp = ".*\\b[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}\\b.*",
+		message = "Address must contain a valid postcode"
+	)
 	private String postcode;
 
 	@NotBlank
@@ -51,36 +53,10 @@ public class Venue {
 	@DecimalMax(value = "180.0", message = "Longitude must be <= 180.0")
 	private Double longitude;
 
-=======
-    
-    @Column(unique = true)
-    @NotBlank
-    @Size(max = 255)
-    private String name;
-    
-    @Positive
-    private int capacity;
-    
-    @NotBlank
-    @Pattern(
-        regexp = ".*\\b[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}\\b.*",
-        message = "Address must contain a valid postcode"
-    )
-    private String postcode;
-    
-    @NotBlank
-    @Size(max = 299)   //< 300 chars
-    private String address;
- 
->>>>>>> refs/remotes/origin/venueapi
 	private String description;
-<<<<<<< HEAD
 
-=======
-	
->>>>>>> refs/remotes/origin/venueapi
 	@JsonIgnore
-	@OneToMany(mappedBy = "venue") // Exercise 2, Task 1: relationship since -- "A venue can host multiple events"
+	@OneToMany(mappedBy = "venue")
 	private Set<Event> events;
 
 	public Venue() {
@@ -108,7 +84,6 @@ public class Venue {
 
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
-
 	}
 
 	public String getAddress() {
@@ -152,6 +127,6 @@ public class Venue {
 	}
 
 	public Set<Event> getEvents() {
-		return events; // returns all events hosted at a this venue
+		return events;
 	}
 }
