@@ -84,4 +84,19 @@ public class VenuesControllerApi {
                 linkTo(methodOn(VenuesControllerApi.class).getNext3Events(id)).withSelfRel()
         );
     }
+    
+    @GetMapping
+    public CollectionModel<EntityModel<Venue>> getAllVenues() {
+
+        List<EntityModel<Venue>> venues = new ArrayList<>();
+
+        for (Venue venue : venueService.findAll()) {
+            venues.add(venueModelAssembler.toModel(venue));
+        }
+
+        return CollectionModel.of(
+            venues,
+            linkTo(methodOn(VenuesControllerApi.class).getAllVenues()).withSelfRel()
+        );
+    }
 }
