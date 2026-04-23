@@ -5,10 +5,13 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +46,7 @@ public class VenuesControllerApiTest {
 
     @Test
     public void getIndexWhenNoVenues() throws Exception {
-        when(venueService.findAll()).thenReturn(Collections.<Venue>emptyList());
+        when(venueService.findAll()).thenReturn(Collections.emptyList());
 
         mvc.perform(get("/api/venues").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
@@ -62,24 +65,74 @@ public class VenuesControllerApiTest {
         v.setName("Test Venue");
         v.setCapacity(100);
 
-        when(venueService.findAll()).thenReturn(Collections.<Venue>singletonList(v));
+        when(venueService.findAll()).thenReturn(Collections.singletonList(v));
 
         mvc.perform(get("/api/venues").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(handler().methodName("getAllVenues"))
-            .andExpect(jsonPath("$.length()", equalTo(1)))
             .andExpect(jsonPath("$._embedded.venues.length()", equalTo(1)))
-            .andExpect(jsonPath("$._embedded.venues[0]._links.next3events.href", 
-                endsWith("/api/venues/1/next3events")));
+            .andExpect(jsonPath("$._embedded.venues[0]._links.self.href", endsWith("/api/venues/1")))
+            .andExpect(jsonPath("$._embedded.venues[0]._links.events.href", endsWith("/api/venues/1/events")))
+            .andExpect(jsonPath("$._embedded.venues[0]._links.next3events.href", endsWith("/api/venues/1/next3events")));
 
         verify(venueService).findAll();
     }
 
     @Test
+    public void getVenueById() throws Exception {
+        Venue v = new Venue();
+        v.setId(1);
+        v.setName("Test Venue");
+        v.setCapacity(100);
+
+        when(venueService.findById(1L)).thenReturn(Optional.of(v));
+
+        mvc.perform(get("/api/venues/1").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(handler().methodName("getVenue"))
+            .andExpect(jsonPath("$.name").value("Test Venue"))
+            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1")))
+            .andExpect(jsonPath("$._links.events.href", endsWith("/api/venues/1/events")))
+            .andExpect(jsonPath("$._links.next3events.href", endsWith("/api/venues/1/next3events")));
+
+        verify(venueService).findById(1L);
+    }
+
+    @Test
     public void getVenueNotFound() throws Exception {
+        when(venueService.findById(99L)).thenReturn(Optional.empty());
+
         mvc.perform(get("/api/venues/99").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.error", containsString("Venue not found")))
-            .andExpect(handler().methodName("getVenue"));
+            .andExpect(handler().methodName("getVenue"))
+            .andExpect(jsonPath("$.error", containsString("Venue not found")));
+    }
+
+    @Test
+    public void getVenueEvents() throws Exception {
+        Venue v = new Venue();
+        v.setId(1);
+
+        when(venueService.findById(1L)).thenReturn(Optional.of(v));
+
+        mvc.perform(get("/api/venues/1/events").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(handler().methodName("getVenueEvents"))
+            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/events")));
+    }
+
+    @Test
+    public void getNext3Events() throws Exception {
+        Venue v = new Venue();
+        v.setId(1);
+
+        when(venueService.findById(1L)).thenReturn(Optional.of(v));
+        when(eventService.findNext3EventsByVenueId(anyLong(), any()))
+            .thenReturn(Collections.emptyList());
+
+        mvc.perform(get("/api/venues/1/next3events").accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(handler().methodName("getNext3Events"))
+            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/next3events")));
     }
 }
