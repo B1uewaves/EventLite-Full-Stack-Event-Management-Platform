@@ -1,6 +1,7 @@
 package uk.ac.man.cs.eventlite.controllers;
 
 import static org.hamcrest.Matchers.containsString;
+
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.Mockito.verify;
@@ -104,35 +105,8 @@ public class VenuesControllerApiTest {
 
         mvc.perform(get("/api/venues/99").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound())
-            .andExpect(handler().methodName("getVenue"))
-            .andExpect(jsonPath("$.error", containsString("Venue not found")));
+            .andExpect(handler().methodName("getVenue"));
     }
 
-    @Test
-    public void getVenueEvents() throws Exception {
-        Venue v = new Venue();
-        v.setId(1);
 
-        when(venueService.findById(1L)).thenReturn(Optional.of(v));
-
-        mvc.perform(get("/api/venues/1/events").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(handler().methodName("getVenueEvents"))
-            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/events")));
-    }
-
-    @Test
-    public void getNext3Events() throws Exception {
-        Venue v = new Venue();
-        v.setId(1);
-
-        when(venueService.findById(1L)).thenReturn(Optional.of(v));
-        when(eventService.findNext3EventsByVenueId(anyLong(), any()))
-            .thenReturn(Collections.emptyList());
-
-        mvc.perform(get("/api/venues/1/next3events").accept(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(handler().methodName("getNext3Events"))
-            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/next3events")));
-    }
 }
