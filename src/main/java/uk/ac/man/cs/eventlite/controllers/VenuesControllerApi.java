@@ -1,6 +1,7 @@
 package uk.ac.man.cs.eventlite.controllers;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import org.springframework.hateoas.Link;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 import java.time.LocalDate;
@@ -96,7 +97,9 @@ public class VenuesControllerApi {
 
         return CollectionModel.of(
             venues,
-            linkTo(methodOn(VenuesControllerApi.class).getAllVenues()).withSelfRel()
+            linkTo(methodOn(VenuesControllerApi.class).getAllVenues()).withSelfRel(),
+            Link.of("http://localhost:8080/api/profile/venues", "profile")
+
         );
     }
 }
