@@ -125,7 +125,10 @@ public class EventsController {
 			model.addAttribute("events", eventService.findAll());
 		}
 		model.addAttribute("venues", venueService.findAll());
+				
 		return "events/index";
+		
+		
 	}
 
 	@GetMapping("/edit/{id}")
@@ -175,5 +178,7 @@ public class EventsController {
 			return "redirect:/events";
 		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
+	
+	
 
 }

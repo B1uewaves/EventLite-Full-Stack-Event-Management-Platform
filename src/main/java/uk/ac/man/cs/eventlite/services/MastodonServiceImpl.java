@@ -1,5 +1,7 @@
 package uk.ac.man.cs.eventlite.services;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
+
+import com.google.gson.Gson;
+import com.sys1yagi.mastodon4j.MastodonClient;
+import com.sys1yagi.mastodon4j.api.entity.Status;
+import com.sys1yagi.mastodon4j.api.method.Timelines;
+
+import okhttp3.OkHttpClient;
 
 @Service
 public class MastodonServiceImpl implements MastodonService {
@@ -43,6 +52,29 @@ public class MastodonServiceImpl implements MastodonService {
 				.body(form)
 				.retrieve()
 				.toBodilessEntity();
+	}
+
+	@Override
+	public List<Status> getLatestPosts() {
+		try {
+			MastodonClient client = new MastodonClient.Builder(
+					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),
+					new OkHttpClient.Builder(),
+					new Gson()
+			).accessToken(accessToken).build();
+
+			Timelines timelines = new Timelines(client);
+
+			List<Status> posts = timelines.getHome()
+					.execute()
+					.getPart();
+
+			return posts.subList(0, Math.min(3, posts.size()));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return List.of();
+		}
 	}
 
 	private String normalisedInstanceUrl() {
