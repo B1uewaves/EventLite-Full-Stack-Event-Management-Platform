@@ -4,9 +4,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Collections;
 
@@ -48,6 +53,9 @@ public class EventsControllerTest {
 	@MockitoBean
 	private VenueService venueService;
 
+	@MockitoBean
+	private MastodonService mastodonService;
+
 	@Test
 	public void getIndexWhenNoEvents() throws Exception {
 		when(eventService.findAll()).thenReturn(Collections.<Event>emptyList());
@@ -83,5 +91,52 @@ public class EventsControllerTest {
 	public void getEventNotFound() throws Exception {
 		mvc.perform(get("/events/99").accept(MediaType.TEXT_HTML)).andExpect(status().isNotFound())
 				.andExpect(view().name("events/not_found")).andExpect(handler().methodName("getEvent"));
+	}
+
+	@Test
+	public void getEventShowsMastodonShareFormWithEventNamePlaceholder() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(get("/events/1").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+				.andExpect(view().name("events/show")).andExpect(handler().methodName("getEvent"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("Share on Mastodon")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("placeholder=\"Java Meetup\"")));
+	}
+
+	@Test
+	public void shareEventPublishesMastodonStatusAndConfirmsOriginalPost() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+		String postContent = "Join us at Java Meetup";
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(post("/events/1/share").param("postContent", postContent).with(csrf()).accept(MediaType.TEXT_HTML))
+				.andExpect(status().isFound()).andExpect(redirectedUrl("/events/1"))
+				.andExpect(flash().attribute("successMessage", "Mastodon status published: " + postContent))
+				.andExpect(handler().methodName("shareEvent"));
+
+		verify(mastodonService).publishStatus(postContent);
+	}
+
+	@Test
+	public void shareEventPreservesReturnToQueryParameterOnRedirect() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+		String postContent = "Join us at Java Meetup";
+		String returnTo = "/events?search=java";
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(post("/events/1/share").param("postContent", postContent).param("returnTo", returnTo).with(csrf())
+				.accept(MediaType.TEXT_HTML)).andExpect(status().isFound())
+				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch%3Djava"))
+				.andExpect(handler().methodName("shareEvent"));
 	}
 }

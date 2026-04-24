@@ -51,6 +51,9 @@ public class Security {
 				
 				//update events
 				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/update/*")).hasRole(ADMIN_ROLE)
+
+				// Share events
+				.requestMatchers(mvc.matcher(HttpMethod.POST, "/events/*/share")).permitAll()
 				
 				// Public pages (all GETs)
 				// Allow event creation
