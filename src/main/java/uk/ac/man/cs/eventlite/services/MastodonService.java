@@ -14,7 +14,7 @@ import okhttp3.OkHttpClient;
 public class MastodonService {
 
     private static final String BASE_URL = "https://defcon.social";
-    private static final String ACCESS_TOKEN = "pN-DkFMqjAU30ybFKQLvIrO5YH5WLHB7sq6LXgkj244";
+    private static final String ACCESS_TOKEN = System.getenv("MASTODON_TOKEN");
 
     public List<Status> getLatestPosts() {
         try {
