@@ -1,4 +1,5 @@
 /target/
 .settings/
 /db/
+.env
 **/.DS_Store
