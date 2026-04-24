@@ -31,6 +31,7 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
+import uk.ac.man.cs.eventlite.services.MastodonPost;
 import uk.ac.man.cs.eventlite.services.MastodonService;
 
 @ExtendWith(SpringExtension.class)
@@ -88,6 +89,23 @@ public class EventsControllerTest {
 	}
 
 	@Test
+	public void getIndexShowsMastodonPostDateAndTimeSeparately() throws Exception {
+		MastodonPost post = new MastodonPost();
+		post.setTime("14:19");
+		post.setDate("2026-04-24");
+		post.setContent("A useful Mastodon post");
+		post.setUrl("https://defcon.social/@manc_bee_f12/1");
+
+		when(mastodonService.getLatestPosts()).thenReturn(Collections.singletonList(post));
+
+		mvc.perform(get("/events").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+				.andExpect(view().name("events/index")).andExpect(handler().methodName("getAllEvents"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("https://defcon.social/@manc_bee_f12/1")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("2026-04-24")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("14:19")));
+	}
+
+	@Test
 	public void getEventNotFound() throws Exception {
 		mvc.perform(get("/events/99").accept(MediaType.TEXT_HTML)).andExpect(status().isNotFound())
 				.andExpect(view().name("events/not_found")).andExpect(handler().methodName("getEvent"));
@@ -136,7 +154,7 @@ public class EventsControllerTest {
 
 		mvc.perform(post("/events/1/share").param("postContent", postContent).param("returnTo", returnTo).with(csrf())
 				.accept(MediaType.TEXT_HTML)).andExpect(status().isFound())
-				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch%3Djava"))
+				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch=java"))
 				.andExpect(handler().methodName("shareEvent"));
 	}
 }

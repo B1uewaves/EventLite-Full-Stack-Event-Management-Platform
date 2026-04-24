@@ -12,7 +12,6 @@ import org.springframework.http.MediaType;
 
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
-import uk.ac.man.cs.eventlite.services.MastodonService;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import org.springframework.ui.Model;
@@ -27,9 +26,6 @@ public class HomeController {
 
     @Autowired
     VenueService VenueService;
-    
-    @Autowired
-    private MastodonService mastodonService;
     
     @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
     public String home(Model model){
@@ -57,8 +53,6 @@ public class HomeController {
 
         model.addAttribute("upcomingThree", upcomingThree);
         model.addAttribute("popularThree", popularThree);
-        model.addAttribute("posts", mastodonService.getLatestPosts());
-
 
         return "home/index";
     }

@@ -40,7 +40,6 @@
                 <a class="stretched-link text-decoration-none"
                   th:href="@{/events/{id}(id=${e.id}, returnTo='/')}"
                   th:text="${e.name}">My Event </a> 
-                  <!--  detailed page (do we need one for venue?) -->
               </td>
               <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
               <td th:text="${{e.date}}">Event date</td>
@@ -77,47 +76,6 @@
           </tr>
         </tbody>
       </table>
-	  
-	  <h2>Social feed</h2>
-	  
-	  <table class="table table-striped table-hover">
-
-	    <thead>
-	      <tr>
-	        <th><i class="fa-solid fa-clock"></i> Time</th>
-	        <th><i class="fa-solid fa-calendar"></i> Date</th>
-	        <th><i class="fa-solid fa-comment"></i> Comment</th>
-	      </tr>
-	    </thead>
-
-		<tbody>
-		  <tr th:each="post : ${posts}">
-
-		    <!-- time -->
-		    <td th:text="${post.time}">12:00</td>
-
-		    <!-- date -->
-		    <td th:text="${post.date}">2025-03-20</td>
-
-		    <!-- comment -->
-		    <td>
-		      <a class="text-decoration-none"
-		         th:href="${post.url}"
-		         target="_blank"
-		         th:utext="${post.content}">
-		      </a>
-		    </td>
-
-		  </tr>
-
-		  <tr th:if="${posts == null or posts.isEmpty()}">
-		    <td colspan="3" class="text-center text-muted py-2">
-		      No posts available
-		    </td>
-		  </tr>
-		</tbody>
-		</table>
-
-		</div>
+    </div>
 </body>
 </html>

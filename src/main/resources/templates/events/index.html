@@ -153,6 +153,30 @@
 	  </tbody>
   </table>
 
+  <h2>Latest Mastodon Posts</h2>
+
+  <div th:if="${posts != null}">
+    <div th:each="post : ${posts}" class="mb-3">
+      <p class="text-muted mb-1">
+        <span th:text="${post.time}">12:00</span>
+        <span class="mx-1">at</span>
+        <span th:text="${post.date}">2026-04-24</span>
+      </p>
+
+      <a class="text-decoration-none"
+         th:href="${post.url}"
+         target="_blank"
+         rel="noopener noreferrer"
+         th:utext="${post.content}">
+        Mastodon post
+      </a>
+      <hr />
+    </div>
+  </div>
+  <div th:if="${posts == null or posts.isEmpty()}">
+    <p>No posts available</p>
+  </div>
+
   </div>
 </body>
 </html>
