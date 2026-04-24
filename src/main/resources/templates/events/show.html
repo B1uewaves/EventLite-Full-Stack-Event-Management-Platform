@@ -59,6 +59,47 @@
 	    </button>
 	  </form>
 
+ <!-- map with check for a single event - JJ -->
+	<div id="map" style="height: 400px; width: 100%;"></div>
+
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+	<script th:inline="javascript">
+	// mapboxgl.accessToken = 'pk.eyJ1IjoieS1hcmp1bi15IiwiYSI6ImNtbzhkcGcwMzAwZ2UycXF3cTkweDY5dW4ifQ.m0zpZa0SpH2KqIRtR0sqdA';
+  
+
+  // the {} at the end makes the code valid and not just a comment 
+  // {} just means and empty object
+  // it gets populated with real server data at runtime
+  var current_event = /*[[${event}]]*/ {}
+
+  if (current_event.venue && current_event.venue.longitude && current_event.venue.latitude) {
+
+        
+    var long = current_event.venue.longitude;
+    var lat = current_event.venue.latitude;
+
+    const map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/streets-v12',
+          center: [long, lat],
+          zoom: 12
+        });
+
+    const marker1 = new mapboxgl.Marker()
+    .setLngLat([long, lat])
+    .addTo(map);
+
+  }
+  else{
+    // selects the map container and hides it if long and lat are null
+    document.getElementById('map').style.display = 'none';
+  }
+	</script>
+
+</div>
+
+
 	</div>
   </div>
 </div>

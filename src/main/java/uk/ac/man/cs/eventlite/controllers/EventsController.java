@@ -136,4 +136,6 @@ public class EventsController {
 		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
 
+	
+
 }
