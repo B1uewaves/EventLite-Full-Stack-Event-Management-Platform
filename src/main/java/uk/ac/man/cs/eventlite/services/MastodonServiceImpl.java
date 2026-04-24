@@ -1,6 +1,10 @@
 package uk.ac.man.cs.eventlite.services;
 
 import java.util.ArrayList;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -57,7 +61,7 @@ public class MastodonServiceImpl implements MastodonService {
 	}
 
 	@Override
-	public List<Status> getLatestPosts() {
+	public List<MastodonPost> getLatestPosts() {
 		try {
 			MastodonClient client = new MastodonClient.Builder(
 					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),
@@ -90,7 +94,21 @@ public class MastodonServiceImpl implements MastodonService {
 			                     p.getAccount().getAcct().contains("manc_bee_f12"))	// filter for manc_bee_f12
 			        .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // chronological order
 			        .limit(3) // last 3 posts
-			        .toList();
+				    .map(p -> {
+
+				        // convert UTC time to UK time
+				        ZonedDateTime ukTime = Instant.parse(p.getCreatedAt()).atZone(ZoneId.of("Europe/London"));
+
+
+				        MastodonPost mp = new MastodonPost();
+				        mp.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+				        mp.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+				        mp.setContent(p.getContent());
+				        mp.setUrl(p.getUrl());
+
+				        return mp;
+				    })
+				    .toList();
 
 		} catch (Exception e) {
 			e.printStackTrace();

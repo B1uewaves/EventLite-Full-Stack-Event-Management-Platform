@@ -7,5 +7,5 @@ public interface MastodonService {
 
     void publishStatus(String content);
 
-    List<Status> getLatestPosts();
+    List<MastodonPost> getLatestPosts();
 }
