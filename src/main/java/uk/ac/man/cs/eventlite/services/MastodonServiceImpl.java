@@ -1,5 +1,10 @@
 package uk.ac.man.cs.eventlite.services;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +17,7 @@ import org.springframework.web.client.RestClient;
 
 import com.google.gson.Gson;
 import com.sys1yagi.mastodon4j.MastodonClient;
+import com.sys1yagi.mastodon4j.api.Range;
 import com.sys1yagi.mastodon4j.api.entity.Status;
 import com.sys1yagi.mastodon4j.api.method.Timelines;
 
@@ -55,21 +61,45 @@ public class MastodonServiceImpl implements MastodonService {
 	}
 
 	@Override
-	public List<Status> getLatestPosts() {
+	public List<MastodonPost> getLatestPosts() {
 		try {
 			MastodonClient client = new MastodonClient.Builder(
 					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),
 					new OkHttpClient.Builder(),
-					new Gson()
-			).accessToken(accessToken).build();
+					new Gson()).accessToken(accessToken).build();
 
 			Timelines timelines = new Timelines(client);
+			List<Status> allPosts = new ArrayList<>();
+			Range range = new Range(null, null, 40);
 
-			List<Status> posts = timelines.getHome()
-					.execute()
-					.getPart();
+			for (int i = 0; i < 5; i++) {
+				List<Status> page = timelines.getHome(range).execute().getPart();
 
-			return posts.subList(0, Math.min(3, posts.size()));
+				if (page.isEmpty()) {
+					break;
+				}
+
+				allPosts.addAll(page);
+
+				long lastId = page.get(page.size() - 1).getId();
+				range = new Range(lastId, null, 40);
+			}
+
+			return allPosts.stream()
+					.filter(post -> post.getAccount() != null && post.getAccount().getAcct() != null
+							&& post.getAccount().getAcct().contains("manc_bee_f12"))
+					.sorted((left, right) -> right.getCreatedAt().compareTo(left.getCreatedAt())).limit(3)
+					.map(post -> {
+						ZonedDateTime ukTime = Instant.parse(post.getCreatedAt()).atZone(ZoneId.of("Europe/London"));
+
+						MastodonPost mastodonPost = new MastodonPost();
+						mastodonPost.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+						mastodonPost.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+						mastodonPost.setContent(post.getContent());
+						mastodonPost.setUrl(post.getUrl());
+
+						return mastodonPost;
+					}).toList();
 
 		} catch (Exception e) {
 			e.printStackTrace();
