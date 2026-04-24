@@ -78,24 +78,51 @@
         </tbody>
       </table>
 	  
-	  <h2>Latest Mastodon Posts</h2>
+	  <h2>Social feed</h2>
+	  
+	  <table class="table table-striped table-hover">
 
-	  <div th:if="${posts != null}">
-	    <div th:each="post : ${posts}" class="mb-3">
-	      <p>
-	        <strong th:text="${post.account.displayName}">User</strong>
-	      </p>
+	    <thead>
+	      <tr>
+	        <th><i class="fa-solid fa-clock"></i> Time</th>
+	        <th><i class="fa-solid fa-calendar"></i> Date</th>
+	        <th><i class="fa-solid fa-comment"></i> Comment</th>
+	      </tr>
+	    </thead>
 
-	      <p th:utext="${post.content}"></p>
+	    <tbody>
+	      <tr th:each="post : ${posts}">
+	        
+	        <!-- fetch time -->
+	        <td th:text="${post.createdAt.substring(11,16)}">12:00</td>
+			
 
-	      <a th:href="${post.url}" target="_blank">View post</a>
-	      <hr/>
-	    </div>
-	  </div>
+	        <!-- fetch date -->
+	        <td th:text="${post.createdAt.substring(0,10)}">2025-03-20</td>
+
+	        <!-- comment (clickable link) -->
+	        <td>
+	          <a class="text-decoration-none"
+	             th:href="${post.url}"
+	             target="_blank"
+	             th:utext="${post.content}">
+	          </a>
+	        </td>
+
+	      </tr>
+
+	      <tr th:if="${posts == null or posts.isEmpty()}">
+	        <td colspan="3" class="text-center text-muted py-3">
+	          No posts available
+	        </td>
+	      </tr>
+
+	    </tbody>
+	  </table>
+
 	  <div th:if="${posts == null or posts.isEmpty()}">
-	    <p>No posts available</p> <!--temporary error handling, since posts are not loading-->
+	    <p>No posts available</p>
 	  </div>
-
     </div>
 </body>
 </html>
