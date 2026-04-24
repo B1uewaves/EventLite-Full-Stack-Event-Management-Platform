@@ -77,6 +77,21 @@
           </tr>
         </tbody>
       </table>
+	  
+	  <h2>Latest Mastodon Posts</h2>
+
+	  <div th:if="${posts != null}">
+	    <div th:each="post : ${posts}" class="mb-3">
+	      <p>
+	        <strong th:text="${post.account.displayName}">User</strong>
+	      </p>
+
+	      <p th:utext="${post.content}"></p>
+
+	      <a th:href="${post.url}" target="_blank">View post</a>
+	      <hr/>
+	    </div>
+	  </div>
 
     </div>
 </body>
