@@ -7,7 +7,7 @@
   <title>All events</title>
 </head>
 <body>
-  <div layout:fragment="content">
+  <div layout:fragment="content" class="pb-5">
     <h1>All events</h1>
 
     <form method="get" action="/events" class="mb-3">
@@ -152,6 +152,59 @@
 	    </tr>
 	  </tbody>
   </table>
+  <!-- Displays the map - JJ  -->
+
+	<div id="map" style="height: 400px; width: 100%;"></div>
+
+	<link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+	<script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+	<script th:inline="javascript">
+	// mapboxgl.accessToken = 'pk.eyJ1IjoieS1hcmp1bi15IiwiYSI6ImNtbzhkcGcwMzAwZ2UycXF3cTkweDY5dW4ifQ.m0zpZa0SpH2KqIRtR0sqdA';
+	var upcomingEvents = /*[[${upcomingEvents}]]*/ [];
+	
+
+	const map = new mapboxgl.Map({
+		container: 'map',
+		style: 'mapbox://styles/mapbox/streets-v12',
+		center: [-2.24, 53.48],
+		zoom: 10
+	});
+
+	const bounds = new mapboxgl.LngLatBounds();
+	let hasValidMarkers = false;
+
+	upcomingEvents.forEach(function(event){
+		if (event.venue && event.venue.longitude && event.venue.latitude){
+			var lng = event.venue.longitude
+			var lat = event.venue.latitude
+			
+			new mapboxgl.Marker()
+				.setLngLat([lng, lat])
+				.addTo(map);
+			
+			// adding points extends teh bounding box
+			bounds.extend([lng,lat])
+			hasValidMarkers = true;
+		}
+	});
+
+	if (hasValidMarkers){
+		// tell the map to fit all the markers
+		map.fitBounds(bounds, {
+			padding: 50, // adds 50 pixels of space around the edges
+			maxZoom: 14 // stops map from zooming in too much if there is only one event
+		});
+	}
+	else{
+		document.getElementById('map').style.display = 'none';
+	}
+
+
+	</script>
+
+
+
+</div>
 
   <h2>Latest Mastodon Posts</h2>
 
@@ -178,5 +231,6 @@
   </div>
 
   </div>
+
 </body>
 </html>
