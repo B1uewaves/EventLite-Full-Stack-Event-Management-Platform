@@ -15,25 +15,25 @@ public class MastodonService {
 
     private static final String BASE_URL = "https://defcon.social";
     private static final String ACCESS_TOKEN = System.getenv("MASTODON_TOKEN");
-
+    
     public List<Status> getLatestPosts() {
         try {
             MastodonClient client = new MastodonClient.Builder(
-                    BASE_URL,
+                    "defcon.social",
                     new OkHttpClient.Builder(),
                     new com.google.gson.Gson()
-            ).accessToken(ACCESS_TOKEN).build();
+            ) .accessToken(ACCESS_TOKEN) .build();
 
             Timelines timelines = new Timelines(client);
 
-            
             List<Status> posts = timelines.getHome()
                     .execute()
                     .getPart();
 
-            return posts.subList(0, Math.min(3, posts.size()));
+            return posts.subList(0, Math.min(3, posts.size())); // returns last 3 posts
 
         } catch (Exception e) {
+            e.printStackTrace();
             return List.of();
         }
     }

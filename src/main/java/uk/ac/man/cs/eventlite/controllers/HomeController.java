@@ -30,7 +30,7 @@ public class HomeController {
     
     @Autowired
     private MastodonService mastodonService;
-
+    
     @GetMapping(value = "/", produces = MediaType.TEXT_HTML_VALUE)
     public String home(Model model){
         LocalDate today = LocalDate.now();
@@ -58,6 +58,7 @@ public class HomeController {
         model.addAttribute("upcomingThree", upcomingThree);
         model.addAttribute("popularThree", popularThree);
         model.addAttribute("posts", mastodonService.getLatestPosts());
+
 
         return "home/index";
     }
