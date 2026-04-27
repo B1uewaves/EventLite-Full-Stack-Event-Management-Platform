@@ -33,6 +33,8 @@ import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
 import uk.ac.man.cs.eventlite.services.MastodonPost;
 import uk.ac.man.cs.eventlite.services.MastodonService;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import org.springframework.security.test.context.support.WithMockUser;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(EventsController.class)
@@ -157,4 +159,37 @@ public class EventsControllerTest {
 				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch=java"))
 				.andExpect(handler().methodName("shareEvent"));
 	}
+/*
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postEventWithMissingRequiredFields() throws Exception {
+        mvc.perform(post("/events/add")
+                .with(csrf())
+                .param("name", "")        // @NotBlank
+                .param("date", "")        // @NotNull
+                .param("venue.id", "")    // @NotNullss
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(view().name("events/add"))
+                .andExpect(model().attributeHasFieldErrors("event", "name"))
+                .andExpect(model().attributeHasFieldErrors("event", "date"))
+                .andExpect(model().attributeHasFieldErrors("event", "venue"));
+    }
+
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postEventSuccess() throws Exception {
+        mvc.perform(post("/events/add")
+                .with(csrf())
+                .param("name", "New Year Party")
+                .param("date", "2026-12-31")
+                .param("time", "23:59")
+                .param("venue.id", "1")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/events"));
+
+        verify(eventService).save(org.mockito.ArgumentMatchers.any(Event.class));
+    }
+		*/
 }
