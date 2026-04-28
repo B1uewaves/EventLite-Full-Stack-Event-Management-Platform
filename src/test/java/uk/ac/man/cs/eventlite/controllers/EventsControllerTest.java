@@ -1,5 +1,6 @@
 package uk.ac.man.cs.eventlite.controllers;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -159,6 +160,34 @@ public class EventsControllerTest {
 				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch=java"))
 				.andExpect(handler().methodName("shareEvent"));
 	}
+
+
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateEventSuccess() throws Exception {
+		// update mock obj
+		Event existingEvent = new Event();
+		existingEvent.setId(1L);
+		Venue v = new Venue();
+		v.setId(1L);
+
+        when(eventService.findById(1L)).thenReturn(java.util.Optional.of(existingEvent));
+        when(venueService.findAll()).thenReturn(Collections.singletonList(v));
+
+        mvc.perform(post("/events/update/1")
+                .with(csrf())
+                .param("name", "Updated Name")
+                .param("date", "2026-12-31")
+                .param("time", "12:00")
+                .param("venue.id", "1")
+                .param("description", "New Description")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/events"));
+
+        // call save
+        verify(eventService).save(any(Event.class));
+    }
 /*
 	@Test
     @WithMockUser(roles = "ADMINISTRATOR")
