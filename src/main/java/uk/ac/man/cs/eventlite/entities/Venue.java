@@ -1,6 +1,8 @@
 package uk.ac.man.cs.eventlite.entities;
 
 import java.util.Set;
+import java.util.HashSet;
+
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -57,7 +59,7 @@ public class Venue {
 
 	@JsonIgnore
 	@OneToMany(mappedBy = "venue")
-	private Set<Event> events;
+	private Set<Event> events = new HashSet<>();
 
 	public Venue() {
 	}
@@ -128,5 +130,9 @@ public class Venue {
 
 	public Set<Event> getEvents() {
 		return events;
+	}
+	
+	public void setEvents(Set<Event> events) {
+	    this.events = events;
 	}
 }
