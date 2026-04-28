@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.StreamSupport;
 
 
 
@@ -63,7 +66,20 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public Iterable<Event> search(String name) {
-		return eventRepository.findByNameContainingIgnoreCase(name);
+		if (name == null || name.trim().isEmpty()) {
+			return eventRepository.findAll();
+		}
+
+		String searchTerm = name.trim().toLowerCase();
+
+		return StreamSupport.stream(eventRepository.findAll().spliterator(), false)
+			.filter(event -> Arrays.stream(event.getName().toLowerCase().split("[^a-z0-9]+"))
+				.anyMatch(word -> word.equals(searchTerm)))
+			.sorted(
+				Comparator.comparing(Event::getDate)
+					.thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+			)
+			.toList();
 	}
 	
 	@Override
@@ -73,12 +89,22 @@ public class EventServiceImpl implements EventService {
 
 	@Override
 	public Iterable<Event> findPastEvents(LocalDate currentDate) {
-		return eventRepository.findByDateBeforeOrderByDateDescTimeDesc(currentDate);
+		return StreamSupport.stream(eventRepository.findByDateBefore(currentDate).spliterator(), false)
+			.sorted(
+				Comparator.comparing(Event::getDate).reversed()
+					.thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+			)
+			.toList();
 	}
 
 	@Override
 	public Iterable<Event> findUpcomingEvents(LocalDate currentDate) {
-		return eventRepository.findByDateGreaterThanEqualOrderByDateAscTimeAsc(currentDate);
+		return StreamSupport.stream(eventRepository.findByDateGreaterThanEqual(currentDate).spliterator(), false)
+			.sorted(
+				Comparator.comparing(Event::getDate)
+					.thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+			)
+			.toList();
 	}
 	
 	@Override
