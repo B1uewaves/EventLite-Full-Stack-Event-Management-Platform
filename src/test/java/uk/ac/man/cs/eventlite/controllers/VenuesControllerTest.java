@@ -13,8 +13,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.springframework.security.test.context.support.WithMockUser;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Collections;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import java.util.List;
+import java.util.Arrays;
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -247,4 +254,309 @@ public class VenuesControllerTest {
         verify(venueService).findById(1L);
         verifyNoMoreInteractions(venueService);
     }
+
+// update venue tests - JJ 
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void getUpdateVenueForm() throws Exception {
+        when(venueService.findById(1L)).thenReturn(Optional.of(venue));
+
+        mvc.perform(get("/venues/edit/1").accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(handler().methodName("showUpdateForm"))
+            .andExpect(model().attributeExists("venue"));
+
+        verify(venueService).findById(1L);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateValidVenue() throws Exception {
+        when(venueService.findById(1L)).thenReturn(Optional.of(venue));
+
+
+        mvc.perform(post("/venues/update/1")
+            .param("name", "Updated Kilburn Building")
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().is3xxRedirection())
+            .andExpect(view().name("redirect:/venues"))
+            .andExpect(handler().methodName("updateVenue"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithoutName() throws Exception {
+        mvc.perform(post("/venues/update/1")
+            .param("name", "")
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "name"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithoutAddress() throws Exception {
+        mvc.perform(post("/venues/update/1")
+            .param("name", "Kilburn Building")
+            .param("address", "")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "address"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithNegativeCapacity() throws Exception {
+        mvc.perform(post("/venues/update/1")
+            .param("name", "Kilburn Building")
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "-10")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "capacity"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithZeroCapacity() throws Exception {
+        mvc.perform(post("/venues/update/1")
+            .param("name", "Kilburn Building")
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "0")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "capacity"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithLongName() throws Exception {
+        String longName = "a".repeat(256);
+
+        mvc.perform(post("/venues/update/1")
+            .param("name", longName)
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "name"));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postUpdateVenueWithLongAddress() throws Exception {
+        String longAddress = "a".repeat(300);
+
+        mvc.perform(post("/venues/update/1")
+            .param("name", "Kilburn Building")
+            .param("address", longAddress)
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/update"))
+            .andExpect(model().attributeHasFieldErrors("venue", "address"));
+    }
+
+    //  view all venues test - jj
+    @Test
+    public void getIndexDisplaysAllVenuesAlphabeticallyWithSummaryInfo() throws Exception {
+        Venue venueA = new Venue();
+        venueA.setId(1L);
+        venueA.setName("Venue A");
+        venueA.setAddress("23 Manchester Road");
+        venueA.setPostcode("E14 3BD");
+        venueA.setCapacity(50);
+
+        Venue venueB = new Venue();
+        venueB.setId(2L);
+        venueB.setName("Venue B");
+        venueB.setAddress("Highland Road");
+        venueB.setPostcode("S43 2EZ");
+        venueB.setCapacity(1000);
+
+        Venue venueC = new Venue();
+        venueC.setId(3L);
+        venueC.setName("Venue C");
+        venueC.setAddress("19 Acacia Avenue");
+        venueC.setPostcode("WA15 8QY");
+        venueC.setCapacity(10);
+
+        
+        when(venueService.findAll()).thenReturn(Arrays.asList(venueA, venueB, venueC));
+
+        
+        org.springframework.test.web.servlet.MvcResult result = mvc.perform(get("/venues").accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/index"))
+            .andExpect(handler().methodName("getAllVenues")) 
+            .andReturn(); 
+
+        // ignore the errors here since the model will never be null because we added venues to it in the mock
+        // and the unchecked cast is safe because we know venues is a List
+        List<Venue> modelVenues = (List<Venue>) result.getModelAndView().getModel().get("venues");
+
+
+        assertNotNull(modelVenues);
+        assertEquals(3, modelVenues.size());
+
+        assertEquals("Venue A", modelVenues.get(0).getName());
+        assertEquals("23 Manchester Road", modelVenues.get(0).getAddress());
+        assertEquals(50, modelVenues.get(0).getCapacity());
+
+
+        assertEquals("Venue B", modelVenues.get(1).getName());
+        assertEquals("Highland Road", modelVenues.get(1).getAddress());
+        assertEquals(1000, modelVenues.get(1).getCapacity());
+
+
+        assertEquals("Venue C", modelVenues.get(2).getName());
+        assertEquals("19 Acacia Avenue", modelVenues.get(2).getAddress());
+        assertEquals(10, modelVenues.get(2).getCapacity());
+
+        verify(venueService).findAll();
+    }
+
+    //  serach venues with whole word matches -jj
+    @Test
+    public void searchForVenueWithTermA() throws Exception {
+        Venue venueA = new Venue();
+        venueA.setId(1L);
+        venueA.setName("Venue A");
+        venueA.setAddress("23 Manchester Road");
+        venueA.setCapacity(50);
+
+        Venue venueB = new Venue();
+        venueB.setId(2L);
+        venueB.setName("Venue B");
+        venueB.setAddress("Highland Road");
+        venueB.setCapacity(1000);
+
+        Venue venueC = new Venue();
+        venueC.setId(3L);
+        venueC.setName("Venues C");
+        venueC.setAddress("19 Acacia Avenue");
+        venueC.setCapacity(10);
+
+        when(venueService.search("a")).thenReturn(Collections.singletonList(venueA));
+
+        org.springframework.test.web.servlet.MvcResult result = mvc.perform(get("/venues")
+            .param("search", "a")
+            .accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/index"))
+            .andExpect(model().attributeExists("venues", "searchTerm"))
+            .andReturn();
+
+
+        // ignore the errors here since the model will never be null because we added venues to it in the mock
+        // and the unchecked cast is safe because we know venues is a List
+        List<Venue> modelVenues = (List<Venue>) result.getModelAndView().getModel().get("venues");
+
+        assertNotNull(modelVenues);
+        assertEquals(1, modelVenues.size(), "Search for 'a' should return exactly 1 venue");
+        
+        assertEquals("Venue A", modelVenues.get(0).getName());
+        assertEquals("23 Manchester Road", modelVenues.get(0).getAddress());
+
+        verify(venueService).search("a");
+    }
+
+
+    @Test
+    public void searchForVenueWithTermVenue() throws Exception {
+        Venue venueA = new Venue();
+        venueA.setId(1L);
+        venueA.setName("Venue A");
+        venueA.setAddress("23 Manchester Road");
+        venueA.setCapacity(50);
+
+        Venue venueB = new Venue();
+        venueB.setId(2L);
+        venueB.setName("Venue B");
+        venueB.setAddress("Highland Road");
+        venueB.setCapacity(1000);
+
+        Venue venueC = new Venue();
+        venueC.setId(3L);
+        venueC.setName("Venues C");
+        venueC.setAddress("19 Acacia Avenue");
+        venueC.setCapacity(10);
+
+        when(venueService.search("venue")).thenReturn(Arrays.asList(venueA, venueB, venueC));
+
+        org.springframework.test.web.servlet.MvcResult result = mvc.perform(get("/venues")
+            .param("search", "venue")
+            .accept(MediaType.TEXT_HTML))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/index"))
+            .andExpect(model().attributeExists("venues", "searchTerm"))
+            .andReturn();
+
+        @SuppressWarnings({"unchecked", "null"})
+        List<Venue> modelVenues = (List<Venue>) result.getModelAndView().getModel().get("venues");
+
+        assertNotNull(modelVenues);
+        assertEquals(3, modelVenues.size(), "Search for 'venue' should return 3 venues");
+        
+        assertEquals("Venue A", modelVenues.get(0).getName());
+        assertEquals("Venue B", modelVenues.get(1).getName());
+
+        verify(venueService).search("venue");
+    }    
+
+    @Test
+    @WithMockUser("ADMINISTRATOR")
+    public void venueWithSameName() throws Exception{
+        when(venueService.existsByName("Venue A")).thenReturn(true);
+        
+        mvc.perform(post("/venues/add")
+            .param("name", "Venue A")
+            .param("address", "Oxford Road")
+            .param("postcode", "M13 9PL")
+            .param("capacity", "300")
+            .with(csrf()))
+            .andExpect(status().isOk())
+            .andExpect(view().name("venues/add"))
+            .andExpect(model().attributeHasFieldErrors("venue", "name"));    
+             
+        verify(venueService).existsByName("Venue A");
+        verify(venueService, org.mockito.Mockito.never()).save(org.mockito.ArgumentMatchers.any(Venue.class));
+    }
+
+
+    @Test
+    @WithMockUser("ADMINISTRATOR")
+    public void getEditVenueFormWhenVenueNotFound() throws Exception {
+        when(venueService.findById(99L)).thenReturn(Optional.empty());
+
+        mvc.perform(get("/venues/99")
+            .accept(MediaType.TEXT_HTML))
+            
+            .andExpect(status().isNotFound()) 
+            .andExpect(view().name("venues/not_found")) 
+            .andExpect(model().attributeExists("not_found_id")); 
+            
+        verify(venueService).findById(99L);
+    }
+
+
 }

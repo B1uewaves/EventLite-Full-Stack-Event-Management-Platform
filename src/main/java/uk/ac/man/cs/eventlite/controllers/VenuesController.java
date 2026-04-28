@@ -43,7 +43,7 @@ public class VenuesController {
         return venueService.findById(id).map(venue -> {
             model.addAttribute("venue", venue);
             return "venues/show";
-        }).orElseThrow(() -> new IllegalArgumentException("Invalid venue id: " + id));
+        }).orElseThrow(() -> new VenueNotFoundException(id)); // so that it is consisitent with edit/id -JJ
     }
 
     @GetMapping("/add")
@@ -78,9 +78,7 @@ public class VenuesController {
     public String showUpdateForm(@PathVariable("id") long id,
             HttpServletRequest request,
             Model model) {
-        if (!request.isUserInRole("ADMINISTRATOR")) {
-            return "redirect:/venues";
-        }
+            // deleted the if statement for checking if user is admin since every logged in user is a admin and if not security.java will redirect to login page - jj
 
         return venueService.findById(id).map(venue -> {
             model.addAttribute("venue", venue);
@@ -94,10 +92,7 @@ public class VenuesController {
             BindingResult result,
             HttpServletRequest request,
             Model model) {
-
-        if (!request.isUserInRole("ADMINISTRATOR")) {
-            return "redirect:/venues";
-        }
+            // deleted the if statement for checking if user is admin since every logged in user is a admin and if not security.java will redirect to login page - jj
 
         if (result.hasErrors()) {
             return "venues/update";
@@ -123,4 +118,6 @@ public class VenuesController {
         model.addAttribute("not_found_id", ex.getId());
         return "venues/not_found";
     }
+
+    
 }

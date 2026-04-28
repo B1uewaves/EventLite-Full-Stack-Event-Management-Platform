@@ -38,7 +38,7 @@ public class VenueServiceImpl implements VenueService {
 
 	@Override
 	public Iterable<Venue> findAll() {
-		return venueRepository.findAllByOrderByCapacityDesc();
+		return venueRepository.findAllByOrderByNameAsc();
 	}
 
 	@Override
@@ -62,6 +62,7 @@ public class VenueServiceImpl implements VenueService {
 	public Iterable<Venue> popularVenues(){
 		return venueRepository.findAllByOrderByCapacityDesc();
 	}
+
 	
 	@Override
 	public boolean existsByName(String name) {
