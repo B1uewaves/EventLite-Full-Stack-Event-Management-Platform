@@ -40,7 +40,6 @@
                 <a class="stretched-link text-decoration-none"
                   th:href="@{/events/{id}(id=${e.id}, returnTo='/')}"
                   th:text="${e.name}">My Event </a> 
-                  <!--  detailed page (do we need one for venue?) -->
               </td>
               <td th:text="${e.venue != null ? e.venue.name : 'Venue TBC'}">Venue TBC</td>
               <td th:text="${{e.date}}">Event date</td>
@@ -77,25 +76,6 @@
           </tr>
         </tbody>
       </table>
-	  
-	  <h2>Latest Mastodon Posts</h2>
-
-	  <div th:if="${posts != null}">
-	    <div th:each="post : ${posts}" class="mb-3">
-	      <p>
-	        <strong th:text="${post.account.displayName}">User</strong>
-	      </p>
-
-	      <p th:utext="${post.content}"></p>
-
-	      <a th:href="${post.url}" target="_blank">View post</a>
-	      <hr/>
-	    </div>
-	  </div>
-	  <div th:if="${posts == null or posts.isEmpty()}">
-	    <p>No posts available</p> <!--temporary error handling, since posts are not loading-->
-	  </div>
-
     </div>
 </body>
 </html>

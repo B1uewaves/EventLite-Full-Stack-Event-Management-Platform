@@ -4,9 +4,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 
 import java.util.Collections;
 
@@ -26,7 +31,10 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
+import uk.ac.man.cs.eventlite.services.MastodonPost;
 import uk.ac.man.cs.eventlite.services.MastodonService;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import org.springframework.security.test.context.support.WithMockUser;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(EventsController.class)
@@ -47,6 +55,9 @@ public class EventsControllerTest {
 
 	@MockitoBean
 	private VenueService venueService;
+
+	@MockitoBean
+	private MastodonService mastodonService;
 
 	@Test
 	public void getIndexWhenNoEvents() throws Exception {
@@ -80,8 +91,105 @@ public class EventsControllerTest {
 	}
 
 	@Test
+	public void getIndexShowsMastodonPostDateAndTimeSeparately() throws Exception {
+		MastodonPost post = new MastodonPost();
+		post.setTime("14:19");
+		post.setDate("2026-04-24");
+		post.setContent("A useful Mastodon post");
+		post.setUrl("https://defcon.social/@manc_bee_f12/1");
+
+		when(mastodonService.getLatestPosts()).thenReturn(Collections.singletonList(post));
+
+		mvc.perform(get("/events").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+				.andExpect(view().name("events/index")).andExpect(handler().methodName("getAllEvents"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("https://defcon.social/@manc_bee_f12/1")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("2026-04-24")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("14:19")));
+	}
+
+	@Test
 	public void getEventNotFound() throws Exception {
 		mvc.perform(get("/events/99").accept(MediaType.TEXT_HTML)).andExpect(status().isNotFound())
 				.andExpect(view().name("events/not_found")).andExpect(handler().methodName("getEvent"));
 	}
+
+	@Test
+	public void getEventShowsMastodonShareFormWithEventNamePlaceholder() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(get("/events/1").accept(MediaType.TEXT_HTML)).andExpect(status().isOk())
+				.andExpect(view().name("events/show")).andExpect(handler().methodName("getEvent"))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("Share on Mastodon")))
+				.andExpect(content().string(org.hamcrest.Matchers.containsString("placeholder=\"Java Meetup\"")));
+	}
+
+	@Test
+	public void shareEventPublishesMastodonStatusAndConfirmsOriginalPost() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+		String postContent = "Join us at Java Meetup";
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(post("/events/1/share").param("postContent", postContent).with(csrf()).accept(MediaType.TEXT_HTML))
+				.andExpect(status().isFound()).andExpect(redirectedUrl("/events/1"))
+				.andExpect(flash().attribute("successMessage", "Mastodon status published: " + postContent))
+				.andExpect(handler().methodName("shareEvent"));
+
+		verify(mastodonService).publishStatus(postContent);
+	}
+
+	@Test
+	public void shareEventPreservesReturnToQueryParameterOnRedirect() throws Exception {
+		Event event = new Event();
+		event.setId(1);
+		event.setName("Java Meetup");
+		String postContent = "Join us at Java Meetup";
+		String returnTo = "/events?search=java";
+
+		when(eventService.findById(1)).thenReturn(java.util.Optional.of(event));
+
+		mvc.perform(post("/events/1/share").param("postContent", postContent).param("returnTo", returnTo).with(csrf())
+				.accept(MediaType.TEXT_HTML)).andExpect(status().isFound())
+				.andExpect(redirectedUrl("/events/1?returnTo=%2Fevents%3Fsearch=java"))
+				.andExpect(handler().methodName("shareEvent"));
+	}
+/*
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postEventWithMissingRequiredFields() throws Exception {
+        mvc.perform(post("/events/add")
+                .with(csrf())
+                .param("name", "")        // @NotBlank
+                .param("date", "")        // @NotNull
+                .param("venue.id", "")    // @NotNullss
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isOk())
+                .andExpect(view().name("events/add"))
+                .andExpect(model().attributeHasFieldErrors("event", "name"))
+                .andExpect(model().attributeHasFieldErrors("event", "date"))
+                .andExpect(model().attributeHasFieldErrors("event", "venue"));
+    }
+
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void postEventSuccess() throws Exception {
+        mvc.perform(post("/events/add")
+                .with(csrf())
+                .param("name", "New Year Party")
+                .param("date", "2026-12-31")
+                .param("time", "23:59")
+                .param("venue.id", "1")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/events"));
+
+        verify(eventService).save(org.mockito.ArgumentMatchers.any(Event.class));
+    }
+		*/
 }

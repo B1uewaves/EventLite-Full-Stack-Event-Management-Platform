@@ -1,13 +1,13 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-	  xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" 
       layout:decorate="~{layouts/default}">
 <head>
   <title>All events</title>
 </head>
 <body>
-  <div layout:fragment="content">
+  <div layout:fragment="content" class="pb-5">
     <h1>All events</h1>
 
     <form method="get" action="/events" class="mb-3">
@@ -18,141 +18,137 @@
       </div>
     </form>
 
-	<h2>Upcoming Events</h2>
+    <h2>Upcoming Events</h2>
     <table class="table table-striped table-hover events-table">
-		<colgroup sec:authorize="isAuthenticated()">
-			<col style="width: 26%">
-			<col style="width: 20%">
-			<col style="width: 14%">
-			<col style="width: 12%">
-			<col style="width: 18%">
-			<col style="width: 10%">
-		</colgroup>
+        <colgroup sec:authorize="isAuthenticated()">
+            <col style="width: 26%">
+            <col style="width: 20%">
+            <col style="width: 14%">
+            <col style="width: 12%">
+            <col style="width: 18%">
+            <col style="width: 10%">
+        </colgroup>
+        <colgroup sec:authorize="!isAuthenticated()">
+            <col style="width: 29%">
+            <col style="width: 23%">
+            <col style="width: 16%">
+            <col style="width: 14%">
+            <col style="width: 18%">
+        </colgroup>
+        <thead>
+          <tr>
+            <th><i class="fa-solid fa-bolt"></i> Event</th>
+            <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
+            <th><i class="fa-solid fa-calendar"></i> Date</th>
+            <th><i class="fa-solid fa-clock"></i> Time</th>
+            <th><i class="fa-solid fa-user"></i> Organiser</th>
+            <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
+          </tr>
+        </thead>
+      <tbody>
+        <tr th:each="e : ${upcomingEvents}">
+          <td>
+            <a class="text-decoration-none" th:href="@{/events/{id}(id=${e.id})}" th:text="${e.name}">My Event</a>
+          </td>
+          <td>
+            <span th:if="${e.venue == null}">Venue TBC</span>
+            <a th:if="${e.venue != null}" th:href="@{/venues/{id}(id=${e.venue.id})}" th:text="${e.venue.name}">Venue Name</a>
+          </td>
+          <td th:text="${{e.date}}">Event date</td>
+          <td th:text="${{e.time}}">Event time</td>
+          <td>
+            <span th:text="${e.ownerUsername}">Owner</span>
+            <span th:if="${#authentication.name == e.ownerUsername}" class="text-muted ms-1">(you)</span>
+          </td>
+          <td sec:authorize="isAuthenticated()">
+            <div class="btn-group" role="group">
+                <a sec:authorize="isAuthenticated()"
+                   th:if="${#authentication.name == e.ownerUsername or #authorization.expression('hasRole(''ADMINISTRATOR'')')}"
+                   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
+                   class="btn btn-sm btn-outline-primary">
+                   <i class="fa-solid fa-pen-to-square"></i> Edit
+                </a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-		<colgroup sec:authorize="!isAuthenticated()">
-			<col style="width: 29%">
-			<col style="width: 23%">
-			<col style="width: 16%">
-			<col style="width: 14%">
-			<col style="width: 18%">
-		</colgroup>
-
-		<thead>
-		  <tr>
-		    <th><i class="fa-solid fa-bolt"></i> Event</th>
-		    <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
-		    <th><i class="fa-solid fa-calendar"></i> Date</th>
-		    <th><i class="fa-solid fa-clock"></i> Time</th>
-		    <th><i class="fa-solid fa-user"></i> Organiser</th>
-		    <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
-		  </tr>
-		</thead>
-	  <tbody>
-		<tr th:each="e : ${upcomingEvents}">
-		  <td>
-		    <a class="text-decoration-none"
-		       th:href="@{/events/{id}(id=${e.id})}"
-		       th:text="${e.name}">My Event</a>
-		  </td>
-		  <td>
-		    <span th:if="${e.venue == null}">Venue TBC</span>
-		    <a th:if="${e.venue != null}"
-		       th:href="@{/venues/{id}(id=${e.venue.id})}"
-		       th:text="${e.venue.name}">
-		       Venue Name
-		    </a>
-		  </td>
-	      <td th:text="${{e.date}}">Event date</td>
-	      <td th:text="${{e.time}}">Event time</td>
-
-		  <td>
-		    <span th:text="${e.ownerUsername}">Owner</span>
-		    <span th:if="${#authentication.name == e.ownerUsername}"
-		          class="text-muted ms-1">(you)</span>
-		  </td>
-
-		  <td sec:authorize="isAuthenticated()" style="position: relative; z-index: 10;">
-		    <div class="btn-group" role="group">
-				<a sec:authorize="isAuthenticated()"
-				   th:if="${#authentication.name == e.ownerUsername or #authorization.expression('hasRole(''ADMINISTRATOR'')')}"
-				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
-				   class="btn btn-sm btn-outline-primary">
-				   <i class="fa-solid fa-pen-to-square"></i> Edit
-				</a>
-		    </div>
-		  </td>
-	    </tr>
-	  </tbody>
-  </table>
-
-	<h2>Past Events</h2>
+    <h2>Past Events</h2>
     <table class="table table-striped table-hover events-table">
-		<colgroup sec:authorize="isAuthenticated()">
-			<col style="width: 26%">
-			<col style="width: 20%">
-			<col style="width: 14%">
-			<col style="width: 12%">
-			<col style="width: 18%">
-			<col style="width: 10%">
-		</colgroup>
+        <thead>
+          <tr>
+            <th><i class="fa-solid fa-bolt"></i> Event</th>
+            <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
+            <th><i class="fa-solid fa-calendar"></i> Date</th>
+            <th><i class="fa-solid fa-clock"></i> Time</th>
+            <th><i class="fa-solid fa-user"></i> Organiser</th>
+            <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
+          </tr>
+        </thead>
+      <tbody>
+        <tr th:each="e : ${pastEvents}">
+          <td><a class="text-decoration-none" th:href="@{/events/{id}(id=${e.id})}" th:text="${e.name}">My Event</a></td>
+          <td>
+            <span th:if="${e.venue == null}">Venue TBC</span>
+            <a th:if="${e.venue != null}" th:href="@{/venues/{id}(id=${e.venue.id})}" th:text="${e.venue.name}">Venue Name</a>
+          </td>
+          <td th:text="${{e.date}}">Event date</td>
+          <td th:text="${{e.time}}">Event time</td>
+          <td>
+            <span th:text="${e.ownerUsername}">Owner</span>
+            <span th:if="${#authentication.name == e.ownerUsername}" class="text-muted ms-1">(you)</span>
+          </td>
+          <td sec:authorize="isAuthenticated()">
+            <a th:if="${#authentication.name == e.ownerUsername}"
+               th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
+               class="btn btn-sm btn-outline-primary">Edit</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-		<colgroup sec:authorize="!isAuthenticated()">
-			<col style="width: 29%">
-			<col style="width: 23%">
-			<col style="width: 16%">
-			<col style="width: 14%">
-			<col style="width: 18%">
-		</colgroup>
+    <div id="map" style="height: 400px; width: 100%;"></div>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.5.1/mapbox-gl.js"></script>
+    <script th:inline="javascript">
+        var upcomingEvents = /*[[${upcomingEvents}]]*/ [];
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [-2.24, 53.48],
+            zoom: 10
+        });
+        const bounds = new mapboxgl.LngLatBounds();
+        let hasValidMarkers = false;
+        upcomingEvents.forEach(function(event){
+            if (event.venue && event.venue.longitude && event.venue.latitude){
+                new mapboxgl.Marker().setLngLat([event.venue.longitude, event.venue.latitude]).addTo(map);
+                bounds.extend([event.venue.longitude, event.venue.latitude]);
+                hasValidMarkers = true;
+            }
+        });
+        if (hasValidMarkers) { map.fitBounds(bounds, { padding: 50, maxZoom: 14 }); }
+        else { document.getElementById('map').style.display = 'none'; }
+    </script>
 
-		<thead>
-		  <tr>
-		    <th><i class="fa-solid fa-bolt"></i> Event</th>
-		    <th><i class="fa-solid fa-map-marker-alt"></i> Venue</th>
-		    <th><i class="fa-solid fa-calendar"></i> Date</th>
-		    <th><i class="fa-solid fa-clock"></i> Time</th>
-		    <th><i class="fa-solid fa-user"></i> Organiser</th>
-		    <th sec:authorize="isAuthenticated()"><i class="fa-solid fa-gear"></i> Actions</th>
-		  </tr>
-		</thead>
+    <h2 class="mt-5">Latest Mastodon Posts</h2>
+    <div th:if="${posts != null}">
+      <div th:each="post : ${posts}" class="mb-3">
+        <p class="text-muted mb-1">
+          <span th:text="${post.time}">12:00</span>
+          <span class="mx-1">at</span>
+          <span th:text="${post.date}">2026-04-24</span>
+        </p>
+        <a class="text-decoration-none" th:href="${post.url}" target="_blank" rel="noopener noreferrer" th:utext="${post.content}">
+          Mastodon post
+        </a>
+        <hr />
+      </div>
+    </div>
+    <div th:if="${posts == null or #lists.isEmpty(posts)}">
+      <p class="text-muted">No posts available</p>
+    </div>
 
-	  <tbody>
-		<tr th:each="e : ${pastEvents}">
-		  <td>
-		    <a class="text-decoration-none"
-		       th:href="@{/events/{id}(id=${e.id})}"
-		       th:text="${e.name}">My Event</a>
-		  </td>
-		  <td>
-		    <span th:if="${e.venue == null}">Venue TBC</span>
-		    <a th:if="${e.venue != null}"
-		       th:href="@{/venues/{id}(id=${e.venue.id})}"
-		       th:text="${e.venue.name}">
-		       Venue Name
-		    </a>
-		  </td>
-	      <td th:text="${{e.date}}">Event date</td>
-	      <td th:text="${{e.time}}">Event time</td>
-
-		  <td>
-		    <span th:text="${e.ownerUsername}">Owner</span>
-		    <span th:if="${#authentication.name == e.ownerUsername}"
-		          class="text-muted ms-1">(you)</span>
-		  </td>
-
-		  <td sec:authorize="isAuthenticated()" style="position: relative; z-index: 10;">
-		    <div class="btn-group" role="group">
-				<a
-				   th:if="${#authentication.name == e.ownerUsername}"
-				   th:href="@{/events/edit/{id}(id=${e.id}, redirect='/events')}"
-				   class="btn btn-sm btn-outline-primary">
-				   <i class="fa-solid fa-pen-to-square"></i> Edit
-				</a>
-		    </div>
-		  </td>
-	    </tr>
-	  </tbody>
-  </table>
-
-  </div>
-</body>
+  </div> </body>
 </html>

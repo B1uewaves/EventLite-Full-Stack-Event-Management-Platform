@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.util.StringUtils;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +26,7 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 import uk.ac.man.cs.eventlite.entities.Event;
+import uk.ac.man.cs.eventlite.services.MastodonService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
@@ -35,6 +39,8 @@ public class EventsController {
 	private EventService eventService;
 	@Autowired
 	private VenueService venueService;
+	@Autowired
+	private MastodonService mastodonService;
 
 	@ExceptionHandler(EventNotFoundException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
@@ -56,6 +62,40 @@ public class EventsController {
 		// replaced .map() with .orElseThrow() as adding the returnTo attribute was causing a type inference error -- JJ
 		return "events/show";
 
+	}
+
+	@PostMapping("/{id}/share")
+	public String shareEvent(@PathVariable("id") long id,
+			@RequestParam("postContent") String postContent,
+			@RequestParam(value = "returnTo", required = false) String returnTo,
+			RedirectAttributes redirectAttrs) {
+
+		eventService.findById(id).orElseThrow(() -> new EventNotFoundException(id));
+
+		if (!StringUtils.hasText(postContent)) {
+			redirectAttrs.addFlashAttribute("errorMessage", "Please enter some content before sharing.");
+			if (StringUtils.hasText(returnTo)) {
+				redirectAttrs.addAttribute("returnTo", returnTo);
+				return "redirect:/events/" + id + "?returnTo={returnTo}";
+			}
+			return "redirect:/events/" + id;
+		}
+
+		String originalPost = postContent.trim();
+		try {
+			mastodonService.publishStatus(originalPost);
+			redirectAttrs.addFlashAttribute("successMessage",
+					"Mastodon status published: " + originalPost);
+		} catch (RuntimeException ex) {
+			redirectAttrs.addFlashAttribute("errorMessage", "The Mastodon status could not be published.");
+		}
+
+		if (StringUtils.hasText(returnTo)) {
+			redirectAttrs.addAttribute("returnTo", returnTo);
+			return "redirect:/events/" + id + "?returnTo={returnTo}";
+		}
+
+		return "redirect:/events/" + id;
 	}
 
 	@GetMapping
@@ -85,6 +125,7 @@ public class EventsController {
 			model.addAttribute("events", eventService.findAll());
 		}
 		model.addAttribute("venues", venueService.findAll());
+		model.addAttribute("posts", mastodonService.getLatestPosts());
 				
 		return "events/index";
 		
@@ -139,6 +180,8 @@ public class EventsController {
 		}).orElseThrow(() -> new EventNotFoundException(id));
 	}
 	
+	
+
 	
 
 }
