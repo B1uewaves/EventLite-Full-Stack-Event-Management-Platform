@@ -21,6 +21,9 @@ import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.mockito.Mockito.when;
+
 @WebMvcTest(MyEventsController.class)
 @Import(Security.class)
 public class MyEventsControllerTest {
@@ -59,8 +62,23 @@ public class MyEventsControllerTest {
                 .param("date", "") // @NotNull
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(status().isOk())
-                .andExpect(view().name("my/events/new")) // 对应 MyEventsController 的逻辑
+                .andExpect(view().name("my/events/new"))
                 .andExpect(model().attributeHasFieldErrors("event", "name"))
                 .andExpect(model().attributeHasFieldErrors("event", "date"));
+    }
+
+	@Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteEventSuccess() throws Exception {
+		Event event = new Event();
+		event.setId(1L);
+        when(eventService.findById(1L)).thenReturn(java.util.Optional.of(event));
+
+        mvc.perform(delete("/my/events/1")
+                .with(csrf()))
+                .andExpect(status().isFound())
+                .andExpect(redirectedUrl("/my/events"))
+                .andExpect(flash().attribute("successMessage", "Event deleted."));
+        verify(eventService).deleteById(1L);
     }
 }
