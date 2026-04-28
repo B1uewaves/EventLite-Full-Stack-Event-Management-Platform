@@ -68,6 +68,9 @@ public class VenueServiceImpl implements VenueService {
 	    String normalizedName = name.trim().replaceAll("\\s+", " ");
 	    return venueRepository.existsByNameIgnoreCase(normalizedName);
 	}
-
-
+	
+	@Override
+	public void deleteById(long id) {
+	    venueRepository.deleteById(id);
+	}
 }

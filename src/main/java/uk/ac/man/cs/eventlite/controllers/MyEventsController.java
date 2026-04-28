@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
+import uk.ac.man.cs.eventlite.config.Security;
 import jakarta.validation.Valid;
 
 @Controller
@@ -67,6 +68,7 @@ public class MyEventsController {
 	@DeleteMapping("/{id}")
 	public String deleteEvent(@PathVariable("id") long id,
 	                          Principal principal,
+	                          Authentication authentication,
 	                          RedirectAttributes redirectAttrs) {
 
 	    Optional<Event> eventOpt = eventService.findById(id);

@@ -19,4 +19,6 @@ public interface VenueService {
 	public Iterable<Venue> popularVenues();
 	
 	boolean existsByName(String name);
+	
+	public void deleteById(long id);
 }

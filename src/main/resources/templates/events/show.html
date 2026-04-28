@@ -50,7 +50,7 @@
 	  </a>
 	  
 	  <form sec:authorize="isAuthenticated()"
-	        th:if="${#authentication.name == event.ownerUsername}"
+	        th:if="${#authentication.name == event.ownerUsername or #authorization.expression('hasRole(''ADMINISTRATOR'')')}"
 	        th:action="@{/my/events/{id}(id=${event.id})}"
 	        th:method="delete"
 	        style="display:inline">
