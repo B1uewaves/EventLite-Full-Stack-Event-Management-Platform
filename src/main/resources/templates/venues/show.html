@@ -2,6 +2,7 @@
 <html
   xmlns:th="http://www.thymeleaf.org"
   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
   layout:decorate="~{layouts/default}"
 >
   <head>
@@ -74,7 +75,18 @@
         </tbody>
       </table>
 
-      <a class="btn btn-primary" th:href="@{/venues}">Back to venues</a>
+	  <a class="btn btn-primary" th:href="@{/venues}">Back to venues</a>
+
+	  <form sec:authorize="isAuthenticated()"
+	        th:action="@{/venues/{id}(id=${venue.id})}"
+	        th:method="delete"
+	        style="display:inline; margin-left:10px;">
+
+	    <button type="submit" class="btn btn-danger">
+	      Delete Venue
+	    </button>
+
+	  </form>
     </div>
   </body>
 </html>

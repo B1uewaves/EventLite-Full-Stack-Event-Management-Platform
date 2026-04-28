@@ -1,5 +1,8 @@
 package uk.ac.man.cs.eventlite.controllers;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.MediaType;
@@ -122,5 +125,25 @@ public class VenuesController {
     public String venueNotFoundHandler(VenueNotFoundException ex, Model model) {
         model.addAttribute("not_found_id", ex.getId());
         return "venues/not_found";
+    }
+    
+    @DeleteMapping("/{id}")
+    public String deleteVenue(@PathVariable("id") long id,
+                              RedirectAttributes redirectAttrs) {
+
+        if (venueService.findById(id).isEmpty()) {
+            redirectAttrs.addFlashAttribute("errorMessage", "Venue not found.");
+            return "redirect:/venues";
+        }
+
+        try {
+            venueService.deleteById(id);
+            redirectAttrs.addFlashAttribute("successMessage", "Venue deleted.");
+        } catch (DataIntegrityViolationException e) {
+            redirectAttrs.addFlashAttribute("errorMessage",
+                    "Venue cannot be deleted because it has one or more events.");
+        }
+
+        return "redirect:/venues";
     }
 }
