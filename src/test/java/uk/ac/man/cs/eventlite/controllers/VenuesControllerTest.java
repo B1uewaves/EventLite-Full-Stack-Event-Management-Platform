@@ -1,5 +1,6 @@
 package uk.ac.man.cs.eventlite.controllers;
 
+import java.util.Set;
 import java.util.Optional;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -16,6 +17,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Collections;
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,6 +39,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import uk.ac.man.cs.eventlite.config.Security;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Venue;
+import uk.ac.man.cs.eventlite.entities.Event;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VenuesController.class)
@@ -483,21 +486,29 @@ public class VenuesControllerTest {
 
     @Test
     public void searchForVenueWithTermVenue() throws Exception {
+        Event event = new Event();
+        Set<Event> eventsC = new HashSet<>(); 
+        eventsC.add(event);
+
         Venue venueA = new Venue();
         venueA.setId(1L);
         venueA.setName("Venue A");
+        venueA.setDescription("cool event");
         venueA.setAddress("23 Manchester Road");
         venueA.setCapacity(50);
 
         Venue venueB = new Venue();
         venueB.setId(2L);
         venueB.setName("Venue B");
+        venueB.setLongitude(85.0);
+        venueB.setLatitude(85.0);
         venueB.setAddress("Highland Road");
         venueB.setCapacity(1000);
 
         Venue venueC = new Venue();
         venueC.setId(3L);
         venueC.setName("Venues C");
+        venueC.setEvents(eventsC);
         venueC.setAddress("19 Acacia Avenue");
         venueC.setCapacity(10);
 
@@ -554,9 +565,10 @@ public class VenuesControllerTest {
             .andExpect(status().isNotFound()) 
             .andExpect(view().name("venues/not_found")) 
             .andExpect(model().attributeExists("not_found_id")); 
-            
+
         verify(venueService).findById(99L);
     }
+
 
 
 }

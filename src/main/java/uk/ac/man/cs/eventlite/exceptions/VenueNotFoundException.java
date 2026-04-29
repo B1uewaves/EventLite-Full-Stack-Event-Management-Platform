@@ -8,7 +8,6 @@ public class VenueNotFoundException extends RuntimeException {
 
     public VenueNotFoundException(long id) {
         super("Could not find venue " + id);
-
         this.id = id;
     }
 

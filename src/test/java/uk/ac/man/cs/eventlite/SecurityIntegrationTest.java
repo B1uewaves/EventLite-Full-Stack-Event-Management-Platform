@@ -86,35 +86,30 @@ public class SecurityIntegrationTest {
 
 	@Test
 	public void signOut() throws Exception {
-		// GET the login form so we can read the CSRF token and session cookie.
 		EntityExchangeResult<String> result = client.get().uri(LOGIN_PATH).accept(MediaType.TEXT_HTML).exchange()
 				.expectStatus().isOk().expectBody(String.class).returnResult();
 		String csrfToken = getCsrfToken(result.getResponseBody());
 		String cookie = result.getResponseCookies().getFirst(SESSION_KEY).getValue();
 
-		// Populate the form with the required data.
 		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
 		form.add("_csrf", csrfToken);
 		form.add("username", "Rob");
 		form.add("password", "Haines");
 
-		// POST the populated login form and get the updated session cookie.
 		result = client.post().uri(LOGIN_PATH).accept(MediaType.TEXT_HTML)
 				.contentType(MediaType.APPLICATION_FORM_URLENCODED).cookie(SESSION_KEY, cookie).bodyValue(form)
 				.exchange().expectStatus().isFound().expectHeader().value("Location", equalTo(baseUri + "/"))
 				.expectBody(String.class).returnResult();
 		cookie = result.getResponseCookies().getFirst(SESSION_KEY).getValue();
 
-		// GET the events page so we can read the CSRF token for the logout form.
 		result = client.get().uri("/events").accept(MediaType.TEXT_HTML).cookie(SESSION_KEY, cookie).exchange()
 				.expectStatus().isOk().expectBody(String.class).returnResult();
 		csrfToken = getCsrfToken(result.getResponseBody());
 
-		// Populate the logout form with the CSRF token.
 		MultiValueMap<String, String> logout = new LinkedMultiValueMap<>();
 		logout.add("_csrf", csrfToken);
 
-		// POST the populated logout form.
+	
 		client.post().uri(LOGOUT_PATH).accept(MediaType.TEXT_HTML).contentType(MediaType.APPLICATION_FORM_URLENCODED)
 				.cookie(SESSION_KEY, cookie).bodyValue(logout).exchange().expectStatus().isFound().expectHeader()
 				.value("Location", equalTo(baseUri + "/"));

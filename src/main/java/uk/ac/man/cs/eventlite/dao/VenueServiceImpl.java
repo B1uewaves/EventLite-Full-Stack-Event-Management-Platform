@@ -56,7 +56,7 @@ public class VenueServiceImpl implements VenueService {
 	@Override
 	public Optional<Venue> findById(long id) {
 		return venueRepository.findById(id);
-	}	
+	}
 
 	@Override
 	public Iterable<Venue> popularVenues(){
