@@ -91,9 +91,12 @@ public class VenuesControllerApiTest {
 
         mvc.perform(get("/api/venues/1").accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(handler().methodName("getVenue"))
             .andExpect(jsonPath("$.name").value("Test Venue"))
+            .andExpect(jsonPath("$.capacity").value(100))
             .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1")))
+            .andExpect(jsonPath("$._links.venue.href", endsWith("/api/venues/1")))
             .andExpect(jsonPath("$._links.events.href", endsWith("/api/venues/1/events")))
             .andExpect(jsonPath("$._links.next3events.href", endsWith("/api/venues/1/next3events")))
 	        .andExpect(jsonPath("$.capacity").value(100))
