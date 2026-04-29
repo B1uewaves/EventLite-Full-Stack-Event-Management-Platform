@@ -31,6 +31,11 @@ public class EventServiceImpl implements EventService {
 
 	@Autowired
 	private EventRepository eventRepository;
+	
+	@Autowired
+	public EventServiceImpl(EventRepository eventRepository) {
+	    this.eventRepository = eventRepository;
+	}
 
 	@Override
 	public long count() {
