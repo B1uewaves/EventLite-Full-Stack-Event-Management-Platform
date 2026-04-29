@@ -73,13 +73,15 @@ public class EventsControllerIntegrationTest  {
 
 
 	@Test
-    public void createEventSuccess() {
-        client.post().uri("/events")
+    public void createEventRequiresAuth() {
+        // Event creation lives at POST /my/events and is auth-protected;
+        // an unauthenticated request must be redirected to sign-in.
+        client.post().uri("/my/events")
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                .bodyValue("name=My+Awesome+Concert&date=2026-10-31") 
+                .bodyValue("name=My+Awesome+Concert&date=2026-10-31")
                 .exchange()
-                .expectStatus().is3xxRedirection() // Expect a redirect after successful save
-                .expectHeader().valueEquals("Location", "/events"); // Check it redirects to the right place
+                .expectStatus().is3xxRedirection()
+                .expectHeader().value("Location", containsString("sign-in"));
     }
 
 	

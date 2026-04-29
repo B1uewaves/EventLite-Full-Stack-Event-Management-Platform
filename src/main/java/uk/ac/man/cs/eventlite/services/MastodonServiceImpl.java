@@ -62,6 +62,9 @@ public class MastodonServiceImpl implements MastodonService {
 
 	@Override
 	public List<MastodonPost> getLatestPosts() {
+		if (!StringUtils.hasText(instanceUrl) || !StringUtils.hasText(accessToken)) {
+			return List.of();
+		}
 		try {
 			MastodonClient client = new MastodonClient.Builder(
 					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),

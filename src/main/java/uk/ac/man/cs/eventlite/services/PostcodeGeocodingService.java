@@ -93,7 +93,8 @@ public class PostcodeGeocodingService {
 
     private Coordinates lookupCoordinates(String postcode) {
         try {
-            String encoded = URLEncoder.encode(postcode, StandardCharsets.UTF_8);
+            // URLEncoder produces `+` for spaces (form encoding); path segments need `%20`.
+            String encoded = URLEncoder.encode(postcode, StandardCharsets.UTF_8).replace("+", "%20");
             URI uri = URI.create("https://api.postcodes.io/postcodes/" + encoded);
 
             HttpRequest request = HttpRequest.newBuilder(uri)

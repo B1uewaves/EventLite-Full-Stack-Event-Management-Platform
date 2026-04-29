@@ -21,57 +21,50 @@ public class InitialDataLoader {
 
 	private static final Logger log = LoggerFactory.getLogger(InitialDataLoader.class);
 
+	private static final String OWNER = "Markel";
+
 	@Bean
 	CommandLineRunner initDatabase(EventService eventService, VenueService venueService) {
 		return args -> {
 			if (eventService.count() > 0) {
-				log.info("Database already populated with events. Skipping event initialization.");
+				log.info("Database already populated. Skipping initial data load.");
 				return;
 			}
 
-			Event e1 = new Event();
-			e1.setName("Distributed Systems Seminar");
-			e1.setDate(LocalDate.of(2026, 5, 12));
-			e1.setTime(LocalTime.of(9, 0));
-			e1.setOwnerUsername("Alice");
-			Venue v1 = new Venue();
-			v1.setName("Whitworth Hall");
-			v1.setAddress("Oxford Road, Manchester");
-			v1.setPostcode("M13 9PL");
-			v1.setCapacity(500);
-			e1.setVenue(v1);
+			Venue venueA = new Venue();
+			venueA.setName("Venue A");
+			venueA.setAddress("Royal Observatory, Greenwich, London");
+			venueA.setPostcode("SE10 9NF");
+			venueA.setCapacity(200);
 
-			Event e2 = new Event();
-			e2.setName("Machine Learning Workshop");
-			e2.setDate(LocalDate.of(2026, 5, 12));
-			e2.setTime(LocalTime.of(12, 0));
-			e2.setOwnerUsername("Tom");
-			Venue v2 = new Venue();
-			v2.setName("Alan Turing");
-			v2.setAddress("Upper Brook Street, Manchester");
-			v2.setPostcode("M13 9PL");
-			v2.setCapacity(1000);
-			e2.setVenue(v2);
+			Venue venueB = new Venue();
+			venueB.setName("Venue B");
+			venueB.setAddress("Old Market Square, Nottingham");
+			venueB.setPostcode("NG1 2DT");
+			venueB.setCapacity(150);
 
-			Event e3 = new Event();
-			e3.setName("Software Engineering Project Showcase");
-			e3.setDate(LocalDate.of(2026, 5, 13));
-			e3.setTime(LocalTime.of(10, 0));
-			e3.setOwnerUsername("Caroline");
-			Venue v3 = new Venue();
-			v3.setName("Crawford House");
-			v3.setAddress("Booth Street East, Manchester");
-			v3.setPostcode("M13 9SS");
-			v3.setCapacity(5000);
-			e3.setVenue(v3);
+			venueService.save(venueA);
+			venueService.save(venueB);
 
-			venueService.save(v1);
-			venueService.save(v2);
-			venueService.save(v3);
-			eventService.save(e1);
-			eventService.save(e2);
-			eventService.save(e3);
+			eventService.save(buildEvent("Event Alpha", LocalDate.of(2026, 7, 11), LocalTime.of(12, 30), venueB));
+			eventService.save(buildEvent("Event Beta",  LocalDate.of(2026, 7, 11), LocalTime.of(10,  0), venueA));
+			eventService.save(buildEvent("Event Apple", LocalDate.of(2026, 7, 12), null,                 venueA));
+
+			eventService.save(buildEvent("Event Former",   LocalDate.of(2020, 1, 11), LocalTime.of(11,  0), venueB));
+			eventService.save(buildEvent("Event Previous", LocalDate.of(2020, 1, 11), LocalTime.of(18, 30), venueA));
+			eventService.save(buildEvent("Event Past",     LocalDate.of(2020, 1, 10), LocalTime.of(17,  0), venueA));
+
+			log.info("Seeded 2 venues and 6 events from the specification.");
 		};
 	}
-}
 
+	private static Event buildEvent(String name, LocalDate date, LocalTime time, Venue venue) {
+		Event event = new Event();
+		event.setName(name);
+		event.setDate(date);
+		event.setTime(time);
+		event.setVenue(venue);
+		event.setOwnerUsername(OWNER);
+		return event;
+	}
+}
