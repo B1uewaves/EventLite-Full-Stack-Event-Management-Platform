@@ -1,10 +1,10 @@
 package uk.ac.man.cs.eventlite.services;
 
+import java.util.ArrayList;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -66,40 +66,49 @@ public class MastodonServiceImpl implements MastodonService {
 			MastodonClient client = new MastodonClient.Builder(
 					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),
 					new OkHttpClient.Builder(),
-					new Gson()).accessToken(accessToken).build();
+					new Gson()
+			).accessToken(accessToken).build();
 
 			Timelines timelines = new Timelines(client);
+
 			List<Status> allPosts = new ArrayList<>();
+
 			Range range = new Range(null, null, 40);
 
-			for (int i = 0; i < 5; i++) {
-				List<Status> page = timelines.getHome(range).execute().getPart();
+			for (int i = 0; i < 5; i++) {  // fetch multiple pages
+			    List<Status> page = timelines.getHome(range)
+			            .execute()
+			            .getPart();
 
-				if (page.isEmpty()) {
-					break;
-				}
+			    if (page.isEmpty()) break;
 
-				allPosts.addAll(page);
+			    allPosts.addAll(page);
 
-				long lastId = page.get(page.size() - 1).getId();
-				range = new Range(lastId, null, 40);
+			    long lastId = page.get(page.size() - 1).getId();
+			    range = new Range(lastId, null, 40);
 			}
 
 			return allPosts.stream()
-					.filter(post -> post.getAccount() != null && post.getAccount().getAcct() != null
-							&& post.getAccount().getAcct().contains("manc_bee_f12"))
-					.sorted((left, right) -> right.getCreatedAt().compareTo(left.getCreatedAt())).limit(3)
-					.map(post -> {
-						ZonedDateTime ukTime = Instant.parse(post.getCreatedAt()).atZone(ZoneId.of("Europe/London"));
+			       	// filter for manc_bee_f12
+			        .filter(p -> p.getAccount() != null &&
+		             "manc_bee_f12".equals(p.getAccount().getUserName()))
+			        .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // chronological order
+			        .limit(3) // last 3 posts
+				    .map(p -> {
 
-						MastodonPost mastodonPost = new MastodonPost();
-						mastodonPost.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-						mastodonPost.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-						mastodonPost.setContent(post.getContent());
-						mastodonPost.setUrl(post.getUrl());
+				        // convert UTC time to UK time
+				        ZonedDateTime ukTime = Instant.parse(p.getCreatedAt()).atZone(ZoneId.of("Europe/London"));
 
-						return mastodonPost;
-					}).toList();
+
+				        MastodonPost mp = new MastodonPost();
+				        mp.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+				        mp.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+				        mp.setContent(p.getContent());
+				        mp.setUrl(p.getUrl());
+
+				        return mp;
+				    })
+				    .toList();
 
 		} catch (Exception e) {
 			e.printStackTrace();
