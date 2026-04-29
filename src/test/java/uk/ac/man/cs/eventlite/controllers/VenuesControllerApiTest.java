@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import uk.ac.man.cs.eventlite.entities.Event;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -170,6 +171,59 @@ public class VenuesControllerApiTest {
             .andExpect(handler().methodName("getNext3Events"));
 
         verify(venueService).findById(99L);
+    }
+    
+    @Test
+    public void getVenueEventsWithEvents() throws Exception {
+        Venue v = new Venue();
+        v.setId(1);
+
+        Event e = new Event();
+        e.setId(10);
+        e.setName("Test Event");
+        e.setVenue(v);
+
+        v.setEvents(Collections.singleton(e));
+
+        when(venueService.findById(1L)).thenReturn(Optional.of(v));
+
+        mvc.perform(get("/api/venues/1/events")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(handler().methodName("getVenueEvents"))
+            .andExpect(jsonPath("$._embedded.events.length()", equalTo(1)))
+            .andExpect(jsonPath("$._embedded.events[0].name").value("Test Event"))
+            .andExpect(jsonPath("$._embedded.events[0]._links.self.href", endsWith("/api/events/10")))
+            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/events")));
+
+        verify(venueService).findById(1L);
+    }
+    
+    @Test
+    public void getNext3EventsWithEvents() throws Exception {
+        Venue v = new Venue();
+        v.setId(1);
+
+        Event e = new Event();
+        e.setId(10);
+        e.setName("Upcoming Event");
+        e.setVenue(v);
+
+        when(venueService.findById(1L)).thenReturn(Optional.of(v));
+        when(eventService.findNext3EventsByVenueId(anyLong(), any()))
+            .thenReturn(Collections.singletonList(e));
+
+        mvc.perform(get("/api/venues/1/next3events")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(handler().methodName("getNext3Events"))
+            .andExpect(jsonPath("$._embedded.events.length()", equalTo(1)))
+            .andExpect(jsonPath("$._embedded.events[0].name").value("Upcoming Event"))
+            .andExpect(jsonPath("$._embedded.events[0]._links.self.href", endsWith("/api/events/10")))
+            .andExpect(jsonPath("$._links.self.href", endsWith("/api/venues/1/next3events")));
+
+        verify(venueService).findById(1L);
+        verify(eventService).findNext3EventsByVenueId(anyLong(), any());
     }
 
 
