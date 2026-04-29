@@ -1,13 +1,10 @@
 package uk.ac.man.cs.eventlite.controllers;
 
-import java.util.Optional;
 import java.security.Principal;
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,17 +63,15 @@ public class MyEventsController {
 	
 	@DeleteMapping("/{id}")
 	public String deleteEvent(@PathVariable("id") long id,
-	                          Principal principal,
 	                          RedirectAttributes redirectAttrs) {
 
-	    Optional<Event> eventOpt = eventService.findById(id);
-
-	    if (eventOpt.isPresent()) {
-	        eventService.deleteById(id);
-	        redirectAttrs.addFlashAttribute("ok_message", "Event deleted.");
-	    } else {
-	        redirectAttrs.addFlashAttribute("error_message", "Event not found.");
+	    if (eventService.findById(id).isEmpty()) {
+	        redirectAttrs.addFlashAttribute("errorMessage", "Event not found.");
+	        return "redirect:/my/events";
 	    }
+
+	    eventService.deleteById(id);
+	    redirectAttrs.addFlashAttribute("successMessage", "Event deleted.");
 
 	    return "redirect:/my/events";
 	}

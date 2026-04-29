@@ -1,6 +1,7 @@
 package uk.ac.man.cs.eventlite.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Comparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -115,9 +116,20 @@ public class EventsController {
 				}
 			}
 
-			model.addAttribute("upcomingEvents", upcomingEvents);
-			model.addAttribute("pastEvents", pastEvents);
-			model.addAttribute("searchTerm", search);
+			upcomingEvents.sort(
+					Comparator.comparing(Event::getDate)
+						.thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+				);
+
+				pastEvents.sort(
+					Comparator.comparing(Event::getDate).reversed()
+						.thenComparing(Event::getName, String.CASE_INSENSITIVE_ORDER)
+				);
+
+				model.addAttribute("upcomingEvents", upcomingEvents);
+				model.addAttribute("pastEvents", pastEvents);
+				model.addAttribute("searchTerm", search);
+
 		} else {
 			LocalDate today = LocalDate.now();
 			model.addAttribute("upcomingEvents", eventService.findUpcomingEvents(today));
