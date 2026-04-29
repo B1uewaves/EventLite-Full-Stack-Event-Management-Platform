@@ -73,6 +73,6 @@ public class MyEventsController {
 	    eventService.deleteById(id);
 	    redirectAttrs.addFlashAttribute("successMessage", "Event deleted.");
 
-	    return "redirect:/events";
+	    return "redirect:/my/events";
 	}
 }
