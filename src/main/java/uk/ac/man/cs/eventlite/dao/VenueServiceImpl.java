@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.ac.man.cs.eventlite.entities.Event;
 import uk.ac.man.cs.eventlite.entities.Venue;
+import uk.ac.man.cs.eventlite.services.PostcodeGeocodingService;
 
 @Service
 public class VenueServiceImpl implements VenueService {
@@ -25,6 +26,7 @@ public class VenueServiceImpl implements VenueService {
 	private final static String DATA = "data/venues.json";
 
 	private VenueRepository venueRepository;
+	private PostcodeGeocodingService postcodeGeocodingService;
 
 	@Autowired // service has an repository, service does not implement or extend a repository
 	public VenueServiceImpl(VenueRepository venueRepository) {
@@ -44,8 +46,18 @@ public class VenueServiceImpl implements VenueService {
 	@Override
 	public Venue save(Venue venue) {
 		String normalizedName = venue.getName().trim().replaceAll("\\s+", " ");
-	    venue.setName(normalizedName);
+		venue.setName(normalizedName);
+
+		if (postcodeGeocodingService != null) {
+			postcodeGeocodingService.populateCoordinatesFromPostcodeIfMissing(venue);
+		}
+
 		return venueRepository.save(venue);
+	}
+
+	@Autowired(required = false)
+	public void setPostcodeGeocodingService(PostcodeGeocodingService postcodeGeocodingService) {
+		this.postcodeGeocodingService = postcodeGeocodingService;
 	}
 
 	@Override
@@ -59,19 +71,18 @@ public class VenueServiceImpl implements VenueService {
 	}
 
 	@Override
-	public Iterable<Venue> popularVenues(){
+	public Iterable<Venue> popularVenues() {
 		return venueRepository.findAllByOrderByCapacityDesc();
 	}
 
-	
 	@Override
 	public boolean existsByName(String name) {
-	    String normalizedName = name.trim().replaceAll("\\s+", " ");
-	    return venueRepository.existsByNameIgnoreCase(normalizedName);
+		String normalizedName = name.trim().replaceAll("\\s+", " ");
+		return venueRepository.existsByNameIgnoreCase(normalizedName);
 	}
-	
+
 	@Override
 	public void deleteById(long id) {
-	    venueRepository.deleteById(id);
+		venueRepository.deleteById(id);
 	}
 }
