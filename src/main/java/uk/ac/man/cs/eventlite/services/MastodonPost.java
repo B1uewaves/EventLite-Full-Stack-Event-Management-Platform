@@ -1,11 +1,14 @@
 package uk.ac.man.cs.eventlite.services;
 
+import java.time.ZonedDateTime;
+
 public class MastodonPost {
 
     private String time;
     private String date;
     private String content;
     private String url;
+	private ZonedDateTime rawDate;
 
     // getters + setters
 
@@ -36,4 +39,12 @@ public class MastodonPost {
     public void setUrl(String url) { 
     	this.url = url; 
     	}
+
+	public ZonedDateTime getRawDate() { 
+		return rawDate; // instead of using the string date we send over the ZonedDateTime object -jj
+	}
+
+	public void setRawDate(ZonedDateTime rawDate) { 
+		this.rawDate = rawDate; 
+	}
 }

@@ -108,6 +108,7 @@ public class EventsControllerApiTest {
 		verify(eventService).findById(1L);
 	}
 
+
 	@Test
 	public void getEventVenue() throws Exception {
 		Event e = new Event();

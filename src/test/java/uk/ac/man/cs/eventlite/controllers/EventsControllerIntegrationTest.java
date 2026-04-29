@@ -26,8 +26,7 @@ import uk.ac.man.cs.eventlite.dao.EventRepository;
 @SpringBootTest(classes = EventLite.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
-public class EventsControllerIntegrationTest  {
-
+public class EventsControllerIntegrationTest{
 	@LocalServerPort
 	private int port;
 
@@ -82,6 +81,21 @@ public class EventsControllerIntegrationTest  {
                 .expectHeader().valueEquals("Location", "/events"); // Check it redirects to the right place
     }
 
-	
-		
+	@Test
+    public void createEventValidationFailure() {
+        String badEventJson = """
+            {
+                "name": "", 
+                "date": "2026-10-31"
+            }
+            """;
+
+        client.post().uri("/events")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(badEventJson)
+                .exchange()
+                .expectStatus().isBadRequest(); 
+    }
+
 }

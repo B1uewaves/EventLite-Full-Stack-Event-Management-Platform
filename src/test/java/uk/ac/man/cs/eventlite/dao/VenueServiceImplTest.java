@@ -62,7 +62,4 @@ class VenueServiceImplTest {
         assertTrue(exists);
         verify(venueRepository).existsByNameIgnoreCase("Withworth Hall");
     }
-
-
-
 }

@@ -21,6 +21,11 @@ import com.sys1yagi.mastodon4j.api.Range;
 import com.sys1yagi.mastodon4j.api.entity.Status;
 import com.sys1yagi.mastodon4j.api.method.Timelines;
 
+// switched from GSON/Mastodon4j to Jackson (Standard Spring JSON tool)
+// jackson is more robust and already built into Spring Boot
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Map;
 import okhttp3.OkHttpClient;
 
 @Service
@@ -38,6 +43,8 @@ public class MastodonServiceImpl implements MastodonService {
 	private String visibility;
 
 	public MastodonServiceImpl() {
+		// using RestClient for publishing and fetching
+        // it is better than the OkHttpClient inside the mastodon4j library, which was causing  timeouts 
 		restClient = RestClient.create();
 	}
 
@@ -60,61 +67,51 @@ public class MastodonServiceImpl implements MastodonService {
 				.toBodilessEntity();
 	}
 
-	@Override
-	public List<MastodonPost> getLatestPosts() {
-		try {
-			MastodonClient client = new MastodonClient.Builder(
-					normalisedInstanceUrl().replace("https://", "").replace("http://", ""),
-					new OkHttpClient.Builder(),
-					new Gson()
-			).accessToken(accessToken).build();
+    @Override
+    public List<MastodonPost> getLatestPosts() {
+        try {
 
-			Timelines timelines = new Timelines(client);
+			
+            String rawJson = restClient.get()
+                    .uri(normalisedInstanceUrl() + "/api/v1/timelines/home?limit=40")
+                    .header("Authorization", "Bearer " + accessToken)
+                    .retrieve()
+                    .body(String.class);
 
-			List<Status> allPosts = new ArrayList<>();
+			
+			// converts rawJson and converts into a list of maps 
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, Object>> posts = mapper.readValue(rawJson, new TypeReference<List<Map<String, Object>>>() {});
 
-			Range range = new Range(null, null, 40);
+            return posts.stream()
+                    .filter(p -> {
+                        Map<String, Object> account = (Map<String, Object>) p.get("account");
+                        return account != null && "manc_bee_f12".equals(account.get("username")); // look through manuall since we dont have .getUsername()
+                    })
 
-			for (int i = 0; i < 5; i++) {  // fetch multiple pages
-			    List<Status> page = timelines.getHome(range)
-			            .execute()
-			            .getPart();
+                    .map(p -> { //converts into mastadon object
+                        String createdAt = (String) p.get("created_at");
+                        ZonedDateTime ukTime = Instant.parse(createdAt).atZone(ZoneId.of("Europe/London"));
 
-			    if (page.isEmpty()) break;
+                        MastodonPost mp = new MastodonPost();
+                        mp.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
+                        mp.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                        mp.setContent((String) p.get("content"));
+                        mp.setUrl((String) p.get("url"));
+                        mp.setRawDate(ukTime); 
 
-			    allPosts.addAll(page);
+                        return mp;
+                    })
+                    .sorted((a, b) -> b.getRawDate().compareTo(a.getRawDate())) // Sort chronologically
+                    .limit(3)
+                    .toList();
 
-			    long lastId = page.get(page.size() - 1).getId();
-			    range = new Range(lastId, null, 40);
-			}
+        } catch (Exception e) {
+            System.err.println("Failed to fetch Mastodon posts: " + e.getMessage());
+            return List.of();
+        }
+    }
 
-			return allPosts.stream()
-			       	// filter for manc_bee_f12
-			        .filter(p -> p.getAccount() != null &&
-		             "manc_bee_f12".equals(p.getAccount().getUserName()))
-			        .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt())) // chronological order
-			        .limit(3) // last 3 posts
-				    .map(p -> {
-
-				        // convert UTC time to UK time
-				        ZonedDateTime ukTime = Instant.parse(p.getCreatedAt()).atZone(ZoneId.of("Europe/London"));
-
-
-				        MastodonPost mp = new MastodonPost();
-				        mp.setTime(ukTime.format(DateTimeFormatter.ofPattern("HH:mm")));
-				        mp.setDate(ukTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
-				        mp.setContent(p.getContent());
-				        mp.setUrl(p.getUrl());
-
-				        return mp;
-				    })
-				    .toList();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			return List.of();
-		}
-	}
 
 	private String normalisedInstanceUrl() {
 		if (instanceUrl.endsWith("/")) {
