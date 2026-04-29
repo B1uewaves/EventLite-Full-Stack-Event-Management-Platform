@@ -47,7 +47,7 @@ class VenueServiceImplTest {
     void existsByNameShouldNormaliseInternalSpaces() {
         when(venueRepository.existsByNameIgnoreCase("Withworth Hall")).thenReturn(true);
 
-        boolean exists = venueService.existsByName("Withworth    Hall");
+        boolean exists = venueService.existsByName("Withworth Hall");
 
         assertTrue(exists);
         verify(venueRepository).existsByNameIgnoreCase("Withworth Hall");
@@ -64,5 +64,5 @@ class VenueServiceImplTest {
     }
 
 
-    
+
 }

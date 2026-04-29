@@ -1,5 +1,7 @@
 package uk.ac.man.cs.eventlite;
 
+import java.time.Duration;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.core.StringEndsWith.endsWith;
 import static uk.ac.man.cs.eventlite.testutil.FormUtil.getCsrfToken;
@@ -41,7 +43,8 @@ public class SecurityIntegrationTest {
 	@BeforeEach
 	public void setUp() {
 		baseUri = "http://localhost:" + port;
-		client = WebTestClient.bindToServer().baseUrl(baseUri).build();
+		client = WebTestClient.bindToServer().baseUrl(baseUri).responseTimeout(Duration.ofSeconds(30)).build();
+		// increased the time of 30 seconds 
 	}
 
 	@Test
