@@ -1,11 +1,6 @@
 package uk.ac.man.cs.eventlite.controllers;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +13,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import uk.ac.man.cs.eventlite.assemblers.EventModelAssembler;
+import uk.ac.man.cs.eventlite.assemblers.VenueModelAssembler;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.entities.Event;
+import uk.ac.man.cs.eventlite.entities.Venue;
 import uk.ac.man.cs.eventlite.exceptions.EventNotFoundException;
 
 import org.springframework.hateoas.CollectionModel;
@@ -40,6 +38,9 @@ public class EventsControllerApi {
 	@Autowired
 	private EventModelAssembler eventAssembler;
 
+	@Autowired
+	private VenueModelAssembler venueAssembler;
+
 	@ExceptionHandler(EventNotFoundException.class)
 	public ResponseEntity<String> eventNotFoundHandler(EventNotFoundException ex) {
 		return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -53,6 +54,19 @@ public class EventsControllerApi {
 				.orElseThrow(() -> new EventNotFoundException(id));
 
 		return eventAssembler.toModel(event);
+	}
+
+	@GetMapping("/{id}/venue")
+	public EntityModel<Venue> getEventVenue(@PathVariable("id") long id) {
+		Event event = eventService.findById(id)
+				.orElseThrow(() -> new EventNotFoundException(id));
+		Venue venue = event.getVenue();
+
+		if (venue == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Venue not found for event " + id);
+		}
+
+		return venueAssembler.toModel(venue);
 	}
 
 	@GetMapping

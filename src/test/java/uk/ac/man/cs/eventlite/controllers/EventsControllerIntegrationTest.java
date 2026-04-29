@@ -57,10 +57,8 @@ public class EventsControllerIntegrationTest  {
 
 	@Test
     public void getSingleEventSuccess() {
-        // 1. ARRANGE: Save a real event into the test database
         Event testEvent = new Event();
         testEvent.setName("Showcase 01");
-        // Note: You may need to set a Date or Venue here depending on your Event class requirements!
         
         Event savedEvent = eventRepository.save(testEvent);
 
@@ -74,6 +72,16 @@ public class EventsControllerIntegrationTest  {
     }
 
 
+	@Test
+    public void createEventSuccess() {
+        client.post().uri("/events")
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .bodyValue("name=My+Awesome+Concert&date=2026-10-31") 
+                .exchange()
+                .expectStatus().is3xxRedirection() // Expect a redirect after successful save
+                .expectHeader().valueEquals("Location", "/events"); // Check it redirects to the right place
+    }
+	
 
-	//
+	
 }
