@@ -81,7 +81,7 @@ public class EventsControllerIntegrationTest  {
                 .expectStatus().is3xxRedirection() // Expect a redirect after successful save
                 .expectHeader().valueEquals("Location", "/events"); // Check it redirects to the right place
     }
-	
 
 	
+		
 }
