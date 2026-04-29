@@ -8,6 +8,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -48,6 +49,20 @@ public class DeleteEventAcceptanceTest {
 
         throw new IllegalStateException("Delete Test Event not found in test database");
     }
+    
+    private Event getDisplayDeleteEvent() {
+        return getEventByName("Display Delete Event");
+    }
+
+    private Event getEventByName(String name) {
+        Iterable<Event> events = eventRepository.findAll();
+        Iterator<Event> it = events.iterator();
+        while (it.hasNext()) {
+            Event e = it.next();
+            if (name.equals(e.getName())) return e;
+        }
+        throw new IllegalStateException(name + " not found in test database");
+    }
 
     @Test
     public void deleteIsNotAvailableFromEventsListPage() throws Exception {
@@ -59,20 +74,20 @@ public class DeleteEventAcceptanceTest {
     @Test
     public void deleteIsNotAvailableFromMyEventsListPage() throws Exception {
         mvc.perform(get("/my/events")
-                .with(user("Rob").roles("ADMINISTRATOR")))
+                .with(user("Alice").roles("ADMINISTRATOR")))
             .andExpect(status().isOk())
             .andExpect(content().string(not(containsString("action=\"/my/events/"))));
     }
 
     @Test
-    public void deleteIsAvailableFromDetailedEventPage() throws Exception {
-        Event event = getDeleteTestEvent();
+    public void deleteIsAvailableFromDetailedEventPageWhenLoggedIn() throws Exception {
+        Event event = getDisplayDeleteEvent();
 
         mvc.perform(get("/events/" + event.getId())
-                .with(user("Rob").roles("ADMINISTRATOR")))
+                .with(user("Alice").roles("ADMINISTRATOR")))
             .andExpect(status().isOk())
             .andExpect(handler().methodName("getEvent"))
-            .andExpect(content().string(containsString("Delete")));
+            .andExpect(content().string(containsString("action=\"/my/events/" + event.getId() + "\"")));
     }
 
     @Test
@@ -81,11 +96,22 @@ public class DeleteEventAcceptanceTest {
         long id = event.getId();
 
         mvc.perform(delete("/my/events/" + id)
-                .with(user("Rob").roles("ADMINISTRATOR"))
+                .with(user("Alice").roles("ADMINISTRATOR"))
                 .with(csrf()))
             .andExpect(status().isFound())
-            .andExpect(view().name("redirect:/my/events"));
+            .andExpect(view().name("redirect:/my/events"))
+            .andExpect(flash().attribute("successMessage", "Event deleted."));
 
         assertFalse(eventRepository.findById(id).isPresent());
+    }
+
+    @Test
+    public void deletingMissingEventRedirectsWithError() throws Exception {
+        mvc.perform(delete("/my/events/99999")
+                .with(user("Alice").roles("ADMINISTRATOR"))
+                .with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/my/events"))
+            .andExpect(flash().attribute("errorMessage", "Event not found."));
     }
 }

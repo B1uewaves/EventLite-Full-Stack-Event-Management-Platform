@@ -1,11 +1,18 @@
 package uk.ac.man.cs.eventlite.controllers;
 
+import java.util.Optional;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +69,31 @@ public class MyEventsControllerTest {
                 .andExpect(view().name("my/events/new")) // 对应 MyEventsController 的逻辑
                 .andExpect(model().attributeHasFieldErrors("event", "name"))
                 .andExpect(model().attributeHasFieldErrors("event", "date"));
+    }
+    
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteExistingEventFlashesSuccessAndRedirects() throws Exception {
+        when(eventService.findById(1L)).thenReturn(Optional.of(new Event()));
+
+        mvc.perform(delete("/my/events/1").with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/my/events"))
+            .andExpect(flash().attribute("successMessage", "Event deleted."));
+
+        verify(eventService).deleteById(1L);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteMissingEventFlashesErrorAndRedirects() throws Exception {
+        when(eventService.findById(99999L)).thenReturn(Optional.empty());
+
+        mvc.perform(delete("/my/events/99999").with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/my/events"))
+            .andExpect(flash().attribute("errorMessage", "Event not found."));
+
+        verify(eventService, never()).deleteById(anyLong());
     }
 }

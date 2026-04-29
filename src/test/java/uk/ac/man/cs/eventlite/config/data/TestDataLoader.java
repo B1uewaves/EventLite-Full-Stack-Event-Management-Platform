@@ -47,11 +47,21 @@ public class TestDataLoader {
 	        Venue venue = new Venue();
 	        venue.setName("Test Venue");
 	        venue.setCapacity(100);
+	        
+	        Venue deleteVenue = new Venue();
+	        deleteVenue.setName("Delete Test Venue");
+	        deleteVenue.setCapacity(200);
+	        
+	        Venue displayDeleteVenue = new Venue();
+	        displayDeleteVenue.setName("Display Delete Venue");
+	        displayDeleteVenue.setCapacity(300);
 
 	        venueService.save(v1);
 	        venueService.save(v2);
 	        venueService.save(v3);
 	        venueService.save(venue);
+	        venueService.save(deleteVenue);
+	        venueService.save(displayDeleteVenue);
 
 	        Event e1 = new Event();
 	        e1.setName("InitialDataLoader creation 01");
@@ -81,6 +91,14 @@ public class TestDataLoader {
 	        event1.setVenue(venue);
 	        event1.setDescription("Event used for delete acceptance test");
 	        event1.setOwnerUsername("Rob");
+	        
+	        Event displayDeleteEvent = new Event();
+	        displayDeleteEvent.setName("Display Delete Event");
+	        displayDeleteEvent.setDate(LocalDate.of(2026, 5, 4));
+	        displayDeleteEvent.setTime(LocalTime.of(9, 0));
+	        displayDeleteEvent.setVenue(venue);
+	        displayDeleteEvent.setDescription("Event used to test delete button visibility only");
+	        displayDeleteEvent.setOwnerUsername("Alice");
 
 	        Event event2 = new Event();
 	        event2.setName("Second Test Event");
@@ -104,6 +122,7 @@ public class TestDataLoader {
 	        eventService.save(event1);
 	        eventService.save(event2);
 	        eventService.save(event3);
+	        eventService.save(displayDeleteEvent);
 
 	        log.info("Loaded test events and venues.");
 	    };
