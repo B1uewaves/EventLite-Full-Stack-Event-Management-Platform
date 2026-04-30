@@ -1,130 +1,258 @@
 package uk.ac.man.cs.eventlite.controllers;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-import java.time.Duration;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 
 import uk.ac.man.cs.eventlite.EventLite;
 import uk.ac.man.cs.eventlite.dao.VenueRepository;
 import uk.ac.man.cs.eventlite.entities.Venue;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = EventLite.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@SpringBootTest(classes = EventLite.class)
+@AutoConfigureMockMvc
+@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ActiveProfiles("test")
 public class VenuesControllerIntegrationTest {
 
-	@LocalServerPort
-	private int port;
-
-	private WebTestClient client;
+	@Autowired
+	private MockMvc mvc;
 
 	@Autowired
 	private VenueRepository venueRepository;
 
-	@BeforeEach
-	public void setup() {
-		client = WebTestClient.bindToServer()
-				.baseUrl("http://localhost:" + port)
-				.responseTimeout(Duration.ofSeconds(30))
-				.build();
+	@Test
+	public void getAllVenuesPassesVenuesToModel() throws Exception {
+		mvc.perform(get("/venues").accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/index"))
+				.andExpect(model().attributeExists("venues"))
+				.andExpect(model().attribute("venues", hasItem(hasProperty("name", equalTo("Alan Turing")))))
+				.andExpect(model().attribute("venues", hasItem(hasProperty("name", equalTo("Crawford House")))))
+				.andExpect(model().attribute("venues", hasItem(hasProperty("name", equalTo("Withworth Hall")))))
+				.andExpect(content().string(containsString("All Venues")));
 	}
 
 	@Test
-	public void testGetAllVenues() {
-		client.get().uri("/venues").accept(MediaType.TEXT_HTML).exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
-				.expectBody(String.class).consumeWith(result -> {
-					String body = result.getResponseBody();
-					assertThat(body, containsString("All Venues"));
-					assertThat(body, containsString("Alan Turing"));
-					assertThat(body, containsString("Crawford House"));
-					assertThat(body, containsString("Withworth Hall"));
-				});
+	public void searchVenuesPassesResultsAndSearchTermToModel() throws Exception {
+		mvc.perform(get("/venues").param("search", "Alan").accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/index"))
+				.andExpect(model().attribute("searchTerm", "Alan"))
+				.andExpect(model().attribute("venues", hasItem(hasProperty("name", equalTo("Alan Turing")))))
+				.andExpect(content().string(containsString("Alan Turing")))
+				.andExpect(content().string(not(containsString("Crawford House"))));
 	}
 
 	@Test
-	public void getVenueNotFound() {
-		client.get().uri("/venues/99999").accept(MediaType.TEXT_HTML).exchange()
-				.expectStatus().isNotFound()
-				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
-				.expectBody(String.class).consumeWith(result -> {
-					String body = result.getResponseBody();
-					assertThat(body, containsString("Venue Not Found"));
-					assertThat(body, containsString("99999"));
-				});
+	public void searchVenuesWithNoMatchPassesEmptyResultsAndSearchTermToModel() throws Exception {
+		mvc.perform(get("/venues").param("search", "ZZNothingHere").accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/index"))
+				.andExpect(model().attribute("searchTerm", "ZZNothingHere"))
+				.andExpect(model().attributeExists("venues"))
+				.andExpect(content().string(containsString("No venues found matching")))
+				.andExpect(content().string(containsString("ZZNothingHere")));
 	}
 
 	@Test
-	public void getSingleVenueSuccess() {
+	public void getSingleVenuePassesVenueToModel() throws Exception {
 		Venue savedVenue = venueRepository.save(venue("Integration Test Venue", 321));
 
-		client.get().uri("/venues/" + savedVenue.getId()).accept(MediaType.TEXT_HTML).exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
-				.expectBody(String.class).consumeWith(result -> {
-					String body = result.getResponseBody();
-					assertThat(body, containsString("Integration Test Venue"));
-					assertThat(body, containsString("Oxford Road, Manchester"));
-					assertThat(body, containsString("M13 9PL"));
-					assertThat(body, containsString("321"));
-				});
+		mvc.perform(get("/venues/" + savedVenue.getId()).accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/show"))
+				.andExpect(model().attribute("venue", hasProperty("name", equalTo("Integration Test Venue"))))
+				.andExpect(model().attribute("venue", hasProperty("address", equalTo("Oxford Road, Manchester"))))
+				.andExpect(model().attribute("venue", hasProperty("postcode", equalTo("M13 9PL"))))
+				.andExpect(model().attribute("venue", hasProperty("capacity", equalTo(321))))
+				.andExpect(content().string(containsString("Integration Test Venue")));
 	}
 
 	@Test
-	public void searchByNameReturnsMatchingVenue() {
-		client.get().uri(uri -> uri.path("/venues").queryParam("search", "Alan").build())
-				.accept(MediaType.TEXT_HTML)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
-				.expectBody(String.class).consumeWith(result -> {
-					String body = result.getResponseBody();
-					assertThat(body, containsString("Alan Turing"));
-					assertThat(body, not(containsString("Crawford House")));
-				});
+	public void getVenueNotFoundPassesMissingIdToModel() throws Exception {
+		mvc.perform(get("/venues/99999").accept("text/html"))
+				.andExpect(status().isNotFound())
+				.andExpect(view().name("venues/not_found"))
+				.andExpect(model().attribute("not_found_id", 99999L))
+				.andExpect(content().string(containsString("Venue Not Found")))
+				.andExpect(content().string(containsString("99999")));
 	}
 
 	@Test
-	public void searchWithNoMatchStillReturnsOk() {
-		client.get().uri(uri -> uri.path("/venues").queryParam("search", "ZZNothingHere").build())
-				.accept(MediaType.TEXT_HTML)
-				.exchange()
-				.expectStatus().isOk()
-				.expectHeader().contentTypeCompatibleWith(MediaType.TEXT_HTML)
-				.expectBody(String.class).consumeWith(result -> {
-					String body = result.getResponseBody();
-					assertThat(body, containsString("No venues found matching"));
-					assertThat(body, containsString("ZZNothingHere"));
-				});
+	public void getEditVenuePassesVenueToModel() throws Exception {
+		Venue savedVenue = venueRepository.save(venue("Integration Edit Venue", 222));
+
+		mvc.perform(get("/venues/edit/" + savedVenue.getId())
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/update"))
+				.andExpect(model().attribute("venue", hasProperty("name", equalTo("Integration Edit Venue"))))
+				.andExpect(model().attribute("venue", hasProperty("address", equalTo("Oxford Road, Manchester"))))
+				.andExpect(model().attribute("venue", hasProperty("postcode", equalTo("M13 9PL"))))
+				.andExpect(model().attribute("venue", hasProperty("capacity", equalTo(222))));
 	}
 
 	@Test
-	public void updateVenueBlockedWithoutAuthOrCsrf() {
-		client.post().uri("/venues/update/1")
-				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-				.bodyValue("name=hax&address=Oxford+Road,+Manchester&postcode=M13+9PL&capacity=200")
-				.exchange()
-				.expectStatus().value(status -> assertTrue(
-						status == 302 || status == 401 || status == 403,
-						"expected redirect or 4xx for unauth/csrf-less POST, got " + status));
+	public void postAddVenueWithSensibleDataSavesVenueAndRedirects() throws Exception {
+		mvc.perform(post("/venues/add")
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "Integration Add Venue")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "250")
+				.accept("text/html"))
+				.andExpect(status().isFound())
+				.andExpect(view().name("redirect:/venues"))
+				.andExpect(redirectedUrl("/venues"));
+
+		assertTrue(venueRepository.existsByNameIgnoreCase("Integration Add Venue"));
+	}
+
+	@Test
+	public void postAddVenueWithMissingDataReturnsFormWithModelErrors() throws Exception {
+		mvc.perform(post("/venues/add")
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "250")
+				.accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/add"))
+				.andExpect(model().attributeExists("venue"))
+				.andExpect(model().attributeHasFieldErrors("venue", "name"));
+	}
+
+	@Test
+	public void postAddVenueWithInvalidDataReturnsFormWithModelErrors() throws Exception {
+		mvc.perform(post("/venues/add")
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "Integration Invalid Venue")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "not-a-postcode")
+				.param("capacity", "250")
+				.accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/add"))
+				.andExpect(model().attributeExists("venue"))
+				.andExpect(model().attributeHasFieldErrors("venue", "postcode"));
+	}
+
+	@Test
+	public void postAddVenueAsUnauthorisedUserRedirectsToSignIn() throws Exception {
+		mvc.perform(post("/venues/add")
+				.with(csrf())
+				.param("name", "Unauthorised Venue")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "250")
+				.accept("text/html"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrlPattern("**/sign-in"));
+	}
+
+	@Test
+	public void postUpdateVenueWithSensibleDataUpdatesVenueAndRedirects() throws Exception {
+		Venue savedVenue = venueRepository.save(venue("Integration Update Venue", 100));
+
+		mvc.perform(post("/venues/update/" + savedVenue.getId())
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "Updated Integration Venue")
+				.param("address", "Sackville Street, Manchester")
+				.param("postcode", "M1 3BB")
+				.param("capacity", "450")
+				.accept("text/html"))
+				.andExpect(status().isFound())
+				.andExpect(view().name("redirect:/venues"))
+				.andExpect(redirectedUrl("/venues"));
+
+		Venue updatedVenue = venueRepository.findById(savedVenue.getId()).orElseThrow();
+		assertEquals("Updated Integration Venue", updatedVenue.getName());
+		assertEquals("Sackville Street, Manchester", updatedVenue.getAddress());
+		assertEquals("M1 3BB", updatedVenue.getPostcode());
+		assertEquals(450, updatedVenue.getCapacity());
+	}
+
+	@Test
+	public void postUpdateVenueWithMissingDataReturnsFormWithModelErrors() throws Exception {
+		Venue savedVenue = venueRepository.save(venue("Integration Missing Update Venue", 100));
+
+		mvc.perform(post("/venues/update/" + savedVenue.getId())
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "Integration Missing Update Venue")
+				.param("address", "")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "100")
+				.accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/update"))
+				.andExpect(model().attributeExists("venue"))
+				.andExpect(model().attributeHasFieldErrors("venue", "address"));
+	}
+
+	@Test
+	public void postUpdateVenueWithInvalidDataReturnsFormWithModelErrors() throws Exception {
+		Venue savedVenue = venueRepository.save(venue("Integration Invalid Update Venue", 100));
+
+		mvc.perform(post("/venues/update/" + savedVenue.getId())
+				.with(user("Alice").roles("ADMINISTRATOR"))
+				.with(csrf())
+				.param("name", "Integration Invalid Update Venue")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "-10")
+				.accept("text/html"))
+				.andExpect(status().isOk())
+				.andExpect(view().name("venues/update"))
+				.andExpect(model().attributeExists("venue"))
+				.andExpect(model().attributeHasFieldErrors("venue", "capacity"));
+	}
+
+	@Test
+	public void postUpdateVenueAsUnauthorisedUserRedirectsToSignIn() throws Exception {
+		Venue savedVenue = venueRepository.save(venue("Integration Unauthorised Update Venue", 100));
+
+		mvc.perform(post("/venues/update/" + savedVenue.getId())
+				.with(csrf())
+				.param("name", "Unauthorised Update Venue")
+				.param("address", "Oxford Road, Manchester")
+				.param("postcode", "M13 9PL")
+				.param("capacity", "100")
+				.accept("text/html"))
+				.andExpect(status().isFound())
+				.andExpect(redirectedUrlPattern("**/sign-in"));
 	}
 
 	private Venue venue(String name, int capacity) {
