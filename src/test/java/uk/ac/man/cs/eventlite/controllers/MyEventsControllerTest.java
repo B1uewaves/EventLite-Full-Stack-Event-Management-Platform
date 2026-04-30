@@ -15,13 +15,15 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
+import java.util.Collections;
+import java.util.Optional;
 import uk.ac.man.cs.eventlite.config.Security;
 import uk.ac.man.cs.eventlite.dao.EventService;
 import uk.ac.man.cs.eventlite.dao.VenueService;
 import uk.ac.man.cs.eventlite.entities.Event;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(MyEventsController.class)
@@ -75,10 +77,54 @@ public class MyEventsControllerTest {
         when(eventService.findById(1L)).thenReturn(java.util.Optional.of(event));
 
         mvc.perform(delete("/my/events/1")
-                .with(csrf()))
+            .with(csrf())
+            .accept(MediaType.TEXT_HTML)) // since the controller enforces that every request accepts a html 
+            .andExpect(status().isFound())
+            .andExpect(redirectedUrl("/my/events"))
+            .andExpect(flash().attribute("successMessage", "Event deleted."));
+        verify(eventService).deleteById(1L);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void getIndexSuccess() throws Exception {
+        when(eventService.findAll()).thenReturn(Collections.emptyList());
+
+        mvc.perform(get("/my/events")
+                .accept(MediaType.TEXT_HTML))
+                .andExpect(status().isOk())
+                .andExpect(view().name("my/events/index"))
+                .andExpect(model().attributeExists("events"));
+
+        verify(eventService).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void getNewEventSuccess() throws Exception {
+        when(venueService.findAll()).thenReturn(Collections.emptyList());
+
+        mvc.perform(get("/my/events/new")
+                .accept(MediaType.TEXT_HTML))
+                .andExpect(status().isOk())
+                .andExpect(view().name("my/events/new"))
+                .andExpect(model().attributeExists("event"))
+                .andExpect(model().attributeExists("venues"));
+
+        verify(venueService).findAll();
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteEventNotFound() throws Exception {
+
+        when(eventService.findById(1L)).thenReturn(Optional.empty());
+
+        mvc.perform(delete("/my/events/1")
+                .with(csrf())
+                .accept(MediaType.TEXT_HTML))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/my/events"))
-                .andExpect(flash().attribute("successMessage", "Event deleted."));
-        verify(eventService).deleteById(1L);
+                .andExpect(flash().attribute("errorMessage", "Event not found."));
     }
 }
