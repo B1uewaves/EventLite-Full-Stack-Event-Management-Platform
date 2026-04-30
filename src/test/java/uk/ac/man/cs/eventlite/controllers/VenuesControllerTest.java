@@ -11,10 +11,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -570,5 +575,44 @@ public class VenuesControllerTest {
     }
 
 
+    
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteExistingVenueFlashesSuccessAndRedirects() throws Exception {
+        when(venueService.findById(1L)).thenReturn(Optional.of(new Venue()));
 
+        mvc.perform(delete("/venues/1").with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/venues"))
+            .andExpect(flash().attribute("successMessage", "Venue deleted."));
+
+        verify(venueService).deleteById(1L);
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteMissingVenueFlashesErrorAndRedirects() throws Exception {
+        when(venueService.findById(99999L)).thenReturn(Optional.empty());
+
+        mvc.perform(delete("/venues/99999").with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/venues"))
+            .andExpect(flash().attribute("errorMessage", "Venue not found."));
+
+        verify(venueService, never()).deleteById(anyLong());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMINISTRATOR")
+    public void deleteVenueWithEventsFlashesConstraintErrorAndRedirects() throws Exception {
+        when(venueService.findById(1L)).thenReturn(Optional.of(new Venue()));
+        doThrow(new DataIntegrityViolationException("FK constraint"))
+                .when(venueService).deleteById(1L);
+
+        mvc.perform(delete("/venues/1").with(csrf()))
+            .andExpect(status().isFound())
+            .andExpect(view().name("redirect:/venues"))
+            .andExpect(flash().attribute("errorMessage",
+                    "Venue cannot be deleted because it has one or more events."));
+    }
 }
